@@ -64,6 +64,7 @@
             text-shadow: 2px 2px #006600; /* UIテキストの影を深い緑に */
             margin-bottom: 10px;
         }
+        /* ライフ表示の色はそのまま維持 */
         #ui #lives {
             color: #ff3399; /* ハートマークの色をピンクに */
             text-shadow: 2px 2px #cc0066;
@@ -207,10 +208,18 @@
 
         #startButtonContainer h1 {
             color: #ffcc00; /* タイトルの色 */
-            font-size: clamp(28px, 6vw, 60px); /* レスポンシブ対応 */
+            /* font-size: clamp(24px, 5vw, 60px); REMOVED: JSで動的に設定 */
             margin-bottom: 20px;
             text-shadow: 3px 3px #cc9900;
             font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+            /* 修正: 文字折り返しと省略のCSSを削除 */
+            white-space: nowrap; /* 一行表示は維持 */
+            max-width: 100%; /* 親要素の幅に対して最大幅を設定 */
+            flex-shrink: 0; /* 縮小しない */
+            width: auto; /* 幅を自動調整 */
+            line-height: 1.2; /* 行の高さを調整 */
+            margin-left: auto; /* 中央寄せを確実に */
+            margin-right: auto; /* 中央寄せを確実に */
         }
 
         #playerNameInput {
@@ -220,7 +229,7 @@
             font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
             font-size: clamp(14px, 2.5vw, 20px);
             padding: 8px 12px;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
             text-align: center;
             width: clamp(150px, 40vw, 250px);
             box-sizing: border-box;
@@ -231,7 +240,24 @@
         #playerNameInput::placeholder {
             color: #006600; /* プレースホルダーの色 */
             opacity: 0.8;
-            text-shadow: none; /* プレースホルダーには影をつけない */
+            /* プレースホルダーにも影を追加 */
+            text-shadow: 1px 1px #003300; /* 少し暗めの影を設定 */
+        }
+
+        /* 名前入力エラーメッセージのスタイル */
+        #playerNameErrorMessage {
+            color: #ffcc00; /* 修正: 黄色に変更 */
+            text-shadow: 1px 1px #cc9900; /* 修正: 黄色系の影 */
+            font-size: clamp(12px, 2vw, 16px);
+            margin-bottom: 10px;
+            min-height: 20px; /* メッセージ表示領域をあらかじめ確保 */
+            visibility: hidden; /* 初期は非表示だがスペースは確保 */
+            /* 修正: テキストが中央に配置されるように調整し、動きを抑制 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2; /* テキストが表示された際の行の高さ */
+            box-sizing: border-box; /* paddingを含めて高さを計算 */
         }
 
         #startButton, #explainButton {
@@ -317,7 +343,7 @@
 
         #rankingsList li .rank-score {
             text-align: right;
-            white-space: nowrap;
+            white-size: nowrap;
         }
 
         /* 説明画面のスタイル */
@@ -358,8 +384,16 @@
             text-align: center;
             margin-top: 0;
             margin-bottom: 20px;
-            font-size: clamp(20px, 4vw, 32px);
+            /* font-size: clamp(20px, 4vw, 32px); REMOVED: JSで動的に設定 */
             text-shadow: 2px 2px #cc9900;
+            /* 修正: 文字折り返しと省略のCSSを削除 */
+            white-space: nowrap; /* 一行表示は維持 */
+            max-width: 100%; /* 親要素の幅に対して最大幅を設定 */
+            flex-shrink: 0; /* 縮小しない */
+            width: auto; /* 幅を自動調整 */
+            line-height: 1.2; /* 行の高さを調整 */
+            margin-left: auto; /* 中央寄せを確実に */
+            margin-right: auto; /* 中央寄せを確実に */
         }
 
         #explanationContent h3 {
@@ -393,7 +427,7 @@
             border: 2px solid #006600;
             border-radius: 5px;
             cursor: pointer;
-            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+            font-family: 'DotGothic16', 'Press Start2P', cursive, monospace;
             font-size: clamp(14px, 2.5vw, 20px);
             text-shadow: 1px 1px #006600;
         }
@@ -423,7 +457,7 @@
                 font-weight: bold;
                 image-rendering: crisp-edges;
                 image-rendering: pixelated;
-                -ms-interpolation-mode: nearest-neighbor;
+                -ms-interpolation-mode: nearest_neighbor;
                 text-shadow: 2px 2px #006600;
             }
             #mobileControls {
@@ -435,7 +469,7 @@
 <body>
     <div id="ui" style="display: none;">
         <div>スコア: <span id="score">0</span></div>
-        <div>ライフ: <span id="lives">❤ ❤ ❤</span></div>
+        <div>ライフ: <span id="lives">3</span></div>
         <div>レベル: <span id="level">1</span></div>
     </div>
     <div id="gameContainer" style="display: none;">
@@ -459,8 +493,9 @@
     </div>
 
     <div id="startButtonContainer">
-        <h1>ハマチ カンパチ シュート</h1>
+        <h1 id="mainTitle">ハマチ カンパチ シュート</h1>
         <input type="text" id="playerNameInput" placeholder="名前を入力">
+        <div id="playerNameErrorMessage"></div>
         <button id="startButton">
             ゲームスタート
         </button>
@@ -476,7 +511,7 @@
 
     <div id="explanationOverlay">
         <div id="explanationContent">
-            <h2>ゲーム説明</h2>
+            <h2 id="explanationTitle">ゲーム説明</h2>
             <p>
                 「ハマチ カンパチ シュート」へようこそ！<br>
                 このゲームは、ハマチとカンパチを正しく理解するためのシューティングゲームです。ザ・グレイトピープルズのハマチカンパチを聴く上での助けになるでしょう。
@@ -495,7 +530,7 @@
 
             <h3>出世魚（しゅっせうお）について</h3>
             <p>
-                「出世魚」とは、成長するにつれて呼び名が変わる魚のことです。地方によっても様々な呼び名があり、その多様性が日本の豊かな食文化を象JECTしています。
+                「出世魚」とは、成長するにつれて呼び名が変わる魚のことです。地方によっても様々な呼び名があり、その多様性が日本の豊かな食文化をJECTしています。
             </p>
             <h4>ブリ系（ハマチ系）の主な呼び名</h4>
             <p>ブリは、稚魚から成魚になるまでに何度も名前を変える、まさに「出世魚」の代表格です。以下に、その成長段階と地域ごとの呼び名を紹介します。</p>
@@ -596,15 +631,6 @@
                                 <li>カンパチ (成魚)</li>
                             </ul>
                         </li>
-                        <li>その他の地域・呼び名:
-                            <ul>
-                                <li>神奈川県: 「ヒヨ」（中型魚60cm程度）</li>
-                                <li>和歌山・高知: 「アカハナ」「チギリキ」</li>
-                                <li>香川: 「アカバネ」</li>
-                                <li>東海〜関西: 若魚を「シオ」</li>
-                                <li>北陸: 「アカイオ」</li>
-                            </ul>
-                        </li>
                     </ul>
                 </li>
             </ul>
@@ -629,7 +655,12 @@
         const rankingsContainer = document.getElementById('rankingsContainer');
         const rankingsList = document.getElementById('rankingsList'); // スタート画面のランキングリスト
         const playerNameInput = document.getElementById('playerNameInput'); // プレイヤー名入力フィールド
+        const playerNameErrorMessage = document.getElementById('playerNameErrorMessage'); // 名前入力エラーメッセージ
         const yourRankDisplay = document.getElementById('yourRank'); // ゲームオーバー画面の順位表示
+
+        // タイトルと説明タイトルの要素を取得
+        const mainTitle = document.getElementById('mainTitle');
+        const explanationTitle = document.getElementById('explanationTitle');
 
         const ORIGINAL_CANVAS_WIDTH = 800;
         const ORIGINAL_CANVAS_HEIGHT = 800;
@@ -740,7 +771,7 @@
             const uiElement = document.getElementById('ui');
             const uiHeight = uiElement && uiElement.style.display !== 'none' ? uiElement.offsetHeight : 0;
             // offsetを少し減らして、より多くのスペースを利用できるように調整
-            const offset = 20; // 元の40pxから変更
+            const offset = 20;
 
             const size = Math.min(vw - offset, vh - uiHeight - offset);
 
@@ -753,6 +784,58 @@
             canvas.width = size;
             canvas.height = size;
         }
+
+        /**
+         * 指定されたテキスト要素のフォントサイズを動的に調整し、親要素の幅に収める関数。
+         * @param {HTMLElement} element - フォントサイズを調整するテキスト要素。
+         * @param {number} maxFontSize - 設定できる最大のフォントサイズ。
+         * @param {number} minFontSize - 設定できる最小のフォントサイズ。
+         */
+        function adjustTextFontSize(element, maxFontSize, minFontSize = 5) {
+            // テキストの描画に必要な一時的なキャンバスコンテキスト
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.imageSmoothingEnabled = false;
+            tempCtx.webkitImageSmoothingEnabled = false;
+            tempCtx.mozImageSmoothingEnabled = false;
+
+            const parentWidth = element.parentElement.clientWidth;
+            const textContent = element.textContent;
+
+            let currentFontSize = maxFontSize;
+
+            // まず最大フォントサイズを設定
+            element.style.fontSize = `${maxFontSize}px`;
+            // 親要素のパディングを考慮してテキストが収まる最大幅を計算
+            const availableWidth = parentWidth - (parseFloat(getComputedStyle(element.parentElement).paddingLeft) || 0) - (parseFloat(getComputedStyle(element.parentElement).paddingRight) || 0);
+
+            // フォントサイズを下げていき、テキストが収まるか、最小フォントサイズに達するまで繰り返す
+            while (currentFontSize >= minFontSize) {
+                tempCtx.font = `${currentFontSize}px 'DotGothic16', 'Press Start 2P', cursive, monospace`;
+                const textWidth = tempCtx.measureText(textContent).width;
+
+                if (textWidth <= availableWidth * 0.95) { // 95%に収まるように少し余裕を持たせる
+                    element.style.fontSize = `${currentFontSize}px`;
+                    return; // 収まったので終了
+                }
+                currentFontSize -= 1; // 1pxずつ減らす
+            }
+            // 最小フォントサイズでも収まらない場合、最小フォントサイズを設定
+            element.style.fontSize = `${minFontSize}px`;
+        }
+
+
+        window.addEventListener('resize', () => {
+            // ゲーム画面またはスタート画面が表示されている場合のみリサイズ処理を実行
+            if (gameContainer.style.display !== 'none' || startButtonContainer.style.display !== 'none') {
+                init();
+            } else {
+                resizeGameContainer(); // それ以外の場合は、単にコンテナサイズを調整（タイトルが表示されない原因ではありません）
+            }
+            // 画面サイズ変更時にもタイトルと説明のフォントサイズを調整
+            adjustTextFontSize(mainTitle, 60); // 最大60px
+            adjustTextFontSize(explanationTitle, 32); // 最大32px
+        });
 
         function init() {
             resizeGameContainer();
@@ -791,15 +874,6 @@
             updateUI();
         }
 
-        window.addEventListener('resize', () => {
-            // ゲーム画面またはスタート画面が表示されている場合のみリサイズ処理を実行
-            if (gameContainer.style.display !== 'none' || startButtonContainer.style.display !== 'none') {
-                init();
-            } else {
-                resizeGameContainer(); // それ以外の場合は、単にコンテナサイズを調整（タイトルが表示されない原因ではありません）
-            }
-        });
-
         function calculateUnifiedEnemyFontSize() {
             const tempCanvas = document.createElement('canvas');
             const tempCtx = tempCanvas.getContext('2d');
@@ -812,14 +886,20 @@
 
             let longestWord = '';
             for (const word of ALL_WORDS) {
-                if (word.length > longestWord.length) {
+                // 漢字を含む長い単語（例：フクラギ、アカバネなど）も考慮して、最も幅を取りそうな単語を選ぶ
+                if (tempCtx.measureText(word).width > tempCtx.measureText(longestWord).width) {
                     longestWord = word;
                 }
             }
+            if (longestWord === '') { // 念のため、配列が空の場合の対処
+                longestWord = 'テスト';
+            }
 
-            let testFontSize = scale(50);
-            while (testFontSize > 5) {
-                // ここでも日本語フォントを優先
+
+            let testFontSize = scale(50); // 開始フォントサイズを調整
+            const minAllowedEnemyFontSize = 8; // 敵の文字の最小フォントサイズ
+
+            while (testFontSize >= minAllowedEnemyFontSize) {
                 tempCtx.font = `bold ${testFontSize}px 'DotGothic16', 'Press Start 2P'`;
                 const metrics = tempCtx.measureText(longestWord);
                 if (metrics.width <= maxTextWidth) {
@@ -827,7 +907,7 @@
                 }
                 testFontSize -= 1;
             }
-            UNIFIED_ENEMY_FONT_SIZE = testFontSize;
+            UNIFIED_ENEMY_FONT_SIZE = Math.max(testFontSize, minAllowedEnemyFontSize); // 最終的に最小値を下回らないように
         }
 
         function createEnemies() {
@@ -1270,7 +1350,8 @@
 
         function updateUI() {
             document.getElementById('score').textContent = gameState.score;
-            document.getElementById('lives').textContent = '❤ '.repeat(gameState.lives);
+            // ライフ表示を数字に変更
+            document.getElementById('lives').textContent = gameState.lives;
             document.getElementById('level').textContent = gameState.level;
         }
 
@@ -1368,9 +1449,9 @@
 
         // ページのロードが完了したら、スタート画面を表示
         document.addEventListener('DOMContentLoaded', () => {
-            // ランキングデータをリセット
-            localStorage.removeItem(RANKING_KEY);
-            console.log('ランキングデータがリセットされました。');
+            // ランキングデータをリセット (デバッグ用)
+            // localStorage.removeItem(RANKING_KEY);
+            // console.log('ランキングデータがリセットされました。');
 
             resizeGameContainer();
             startButtonContainer.style.display = 'flex';
@@ -1378,15 +1459,26 @@
             gameContainer.style.display = 'none';
             document.getElementById('mobileControls').style.display = 'none';
             explanationOverlay.style.display = 'none'; // 説明画面も最初は非表示に
+            playerNameErrorMessage.style.visibility = 'hidden'; // エラーメッセージの初期状態を非表示に設定
             displayRankings(); // 初期表示でランキングを表示
+
+            // 初期ロード時にタイトルと説明のフォントサイズを調整
+            adjustTextFontSize(mainTitle, 60); // 最大60px
+            adjustTextFontSize(explanationTitle, 32); // 最大32px
         });
 
         // スタートボタンがクリックされた時の処理
         startButton.addEventListener('click', () => {
             let playerName = playerNameInput.value.trim();
+
             if (playerName === "") {
-                playerName = "名無し";
+                playerNameErrorMessage.textContent = "名前を入力してください";
+                playerNameErrorMessage.style.visibility = 'visible'; // エラーメッセージを表示
+                return; // ゲーム開始を中断
+            } else {
+                playerNameErrorMessage.style.visibility = 'hidden'; // エラーメッセージを非表示
             }
+
             gameState.playerName = playerName.substring(0, 10); // 最大10文字に制限
 
             // 最後に記録されたスコアのタイムスタンプを保存（同点処理用）
@@ -1417,12 +1509,16 @@
         explainButton.addEventListener('click', () => {
             startButtonContainer.style.display = 'none'; // スタート画面を非表示
             explanationOverlay.style.display = 'flex'; // 説明画面を表示
+            // 説明画面表示時にもタイトルフォントサイズを調整
+            adjustTextFontSize(explanationTitle, 32);
         });
 
         // 説明画面の閉じるボタンがクリックされた時の処理
         closeExplanationButton.addEventListener('click', () => {
             explanationOverlay.style.display = 'none'; // 説明画面を非表示
             startButtonContainer.style.display = 'flex'; // スタート画面を再表示
+            // スタート画面に戻った時にもメインタイトルフォントサイズを調整
+            adjustTextFontSize(mainTitle, 60);
         });
     </script>
 </body>
