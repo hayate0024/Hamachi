@@ -666,6 +666,10 @@
         const ORIGINAL_CANVAS_WIDTH = 800;
         const ORIGINAL_CANVAS_HEIGHT = 800;
 
+        // Google Apps Scriptのデプロイ済みWebアプリのURL
+        // ここを新しいURLに置き換えました
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbywluJDIqxtB4KPCIisupiJ8h4HkAiEqHK0uYZVc05Dau92SYlRbn3nvUVZs8An8p1X/exec';
+
         // ハマチ系の呼び名をカンパチと同じ形式に統一
         const HAMACHI_WORDS = [
             'モジャコ', // 稚魚
@@ -732,7 +736,7 @@
             lastEnemyAutoDropTime: 0,
             playerTargetPositions: [],
             currentPlayerTargetIndex: 0,
-            lastScoreTimestamp: 0 // スコア保存時のタイムスタンプを保持
+            // lastScoreTimestamp: 0 // Google Apps Script連携により不要
         };
 
         const WATER_SURFACE_Y_OFFSET_FROM_ENEMY_TOP = -50;
@@ -1069,7 +1073,7 @@
                 document.getElementById('ui').style.display = 'none';
                 gameContainer.style.display = 'none';
                 document.getElementById('mobileControls').style.display = 'none';
-                displayRankings(); // スタート画面に戻る際にランキングを再表示
+                fetchAndDisplayRankings(); // スタート画面に戻る際にランキングを再表示
             }
         });
 
@@ -1237,16 +1241,15 @@
                    rect1.y + rect2.height > rect2.y;
         }
 
-        function setGameOver() {
+        async function setGameOver() {
             gameState.gameOver = true;
             document.getElementById('gameOver').style.display = 'block';
             document.getElementById('finalScore').textContent = gameState.score;
             playBeep(100, 'triangle', 0.5, 0.9);
 
-            // スコアを保存
-            saveScore(gameState.playerName, gameState.score);
-            // 自分の順位を表示
-            displayYourRank(gameState.score);
+            // スコアをGoogle Apps Scriptに送信
+            await sendScoreToGAS(gameState.playerName, gameState.score);
+            // 自分の順位を表示は、ランキング取得後にまとめて行う
         }
 
         function checkLevelUp() {
@@ -1400,88 +1403,128 @@
             animationFrameId = requestAnimationFrame(gameLoop);
         }
 
-        // --- スコアランキング機能 ---
-        const RANKING_KEY = 'spaceInvadersRankings';
+        // --- Google Apps Script連携機能 ---
 
-        function getRankings() {
-            const rankings = JSON.parse(localStorage.getItem(RANKING_KEY) || '[]');
-            // スコアが高い順にソート。スコアが同じ場合は、より新しいタイムスタンプが上の順位になるようにソート
-            return rankings.sort((a, b) => {
-                if (b.score !== a.score) {
-                    return b.score - a.score;
+        /**
+         * スコアをGoogle Apps Scriptに送信します。
+         * @param {string} playerName - プレイヤー名。
+         * @param {number} score - スコア。
+         */
+        async function sendScoreToGAS(playerName, score) {
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'cors', // CORSを有効にする
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ playerName: playerName, score: score }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                return b.timestamp - a.timestamp; // 新しいタイムスタンプが上に
-            });
+
+                const data = await response.json();
+                console.log('Score saved response:', data);
+
+                if (data.status === 'success') {
+                    // スコア保存後にランキングを更新して表示
+                    displayRankings(data.ranking); // スプレッドシートから取得したランキングデータを直接渡す
+                    displayYourRank(score, playerName, data.ranking); // 自分の順位を表示
+                } else {
+                    console.error('Failed to save score:', data.message);
+                }
+            } catch (error) {
+                console.error('Error sending score to GAS:', error);
+            }
         }
 
-        function saveScore(name, score) {
-            const rankings = getRankings();
-            const newScoreEntry = { name: name, score: score, timestamp: gameState.lastScoreTimestamp };
-            rankings.push(newScoreEntry);
-            localStorage.setItem(RANKING_KEY, JSON.stringify(rankings));
-            // スコア保存後にもう一度ランキングをソート
-            rankings.sort((a, b) => {
-                if (b.score !== a.score) {
-                    return b.score - a.score;
+        /**
+         * Google Apps Scriptからランキングデータを取得し、表示します。
+         */
+        async function fetchAndDisplayRankings() {
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'GET',
+                    mode: 'cors', // CORSを有効にする
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                return b.timestamp - a.timestamp;
-            });
+
+                const data = await response.json();
+                console.log('Fetched rankings:', data);
+
+                if (data.status === 'success' && data.ranking) {
+                    displayRankings(data.ranking); // 取得したランキングデータを表示
+                } else {
+                    console.error('Failed to fetch rankings:', data.message);
+                    rankingsList.innerHTML = '<li>ランキングの取得に失敗しました。</li>';
+                }
+            } catch (error) {
+                console.error('Error fetching rankings from GAS:', error);
+                rankingsList.innerHTML = '<li>ランキングの取得に失敗しました。</li>';
+            }
         }
 
-        function displayRankings(targetListElement = rankingsList) {
-            const rankings = getRankings();
+        /**
+         * ランキングリストをDOMに表示します。
+         * @param {Array<Object>} rankings - 表示するランキングデータ。
+         * @param {HTMLElement} targetListElement - ランキングを表示するHTML要素。デフォルトは`rankingsList`。
+         */
+        function displayRankings(rankings, targetListElement = rankingsList) {
             targetListElement.innerHTML = ''; // リストをクリア
 
-            // ランキングは上位3位まで
-            const top3 = rankings.slice(0, 3);
-
-            if (top3.length === 0) {
+            if (rankings.length === 0) {
                 const li = document.createElement('li');
                 li.textContent = 'まだスコアがありません';
                 targetListElement.appendChild(li);
                 return;
             }
 
-            top3.forEach((rank, index) => {
+            rankings.forEach((rank, index) => {
                 const li = document.createElement('li');
                 li.innerHTML = `<span class="rank-name">${index + 1}. ${rank.name}</span><span class="rank-score">${rank.score}</span>`;
                 targetListElement.appendChild(li);
             });
         }
 
-        function displayYourRank(currentScore) {
-            const rankings = getRankings();
-            let yourRank = '圏外';
+        /**
+         * 自分のスコアがランキングのどこに位置するかを表示します。
+         * @param {number} currentScore - 現在のゲームの最終スコア。
+         * @param {string} currentPlayerName - 現在のプレイヤー名。
+         * @param {Array<Object>} allRankings - 全てのランキングデータ（Google Apps Scriptから取得したもの）。
+         */
+        function displayYourRank(currentScore, currentPlayerName, allRankings) {
+            let yourRankText = '圏外';
             let foundIndex = -1;
 
-            // 自分のスコアがランキングのどこに位置するかを探す
-            for (let i = 0; i < rankings.length; i++) {
-                // スコアと、名前、タイムスタンプが一致する（つまり自分のエントリ）を見つける
-                if (rankings[i].score === currentScore &&
-                    rankings[i].name === gameState.playerName &&
-                    rankings[i].timestamp === gameState.lastScoreTimestamp) {
+            // スコアと、名前が一致する（自分のエントリ）を見つける
+            // Google Apps Scriptはタイムスタンプでソート済みなので、厳密なタイムスタンプ比較は不要だが、
+            // 念のため、スコアが同じ場合の同点順位はGAS側で処理されていることを期待。
+            for (let i = 0; i < allRankings.length; i++) {
+                if (allRankings[i].score === currentScore && allRankings[i].name === currentPlayerName) {
                     foundIndex = i;
                     break;
                 }
             }
 
             if (foundIndex !== -1) {
-                yourRank = `${foundIndex + 1}位`;
+                yourRankText = `${foundIndex + 1}位`;
             } else {
-                // スコアがランキングにない場合（例えば、ランキング外の場合）
-                // ただし、このゲームでは全てのスコアが保存されるので、基本的にはここには来ないはずだが、念のため
-                yourRank = `${rankings.length + 1}位`; // 最下位より一つ下、という表現
+                // スコアがランキングにない場合（例えば、ランキングが10件までで、それより低いスコアの場合）
+                // または、全く同じ名前とスコアの人が既に上位にいて表示されていない場合など
+                // 今回はGAS側で上位10件を返すため、それ以外は「圏外」とする
+                yourRankText = 'ランク外';
             }
-            yourRankDisplay.textContent = `あなたの順位: ${yourRank}`;
+            yourRankDisplay.textContent = `あなたの順位: ${yourRankText}`;
         }
 
 
         // ページのロードが完了したら、スタート画面を表示
         document.addEventListener('DOMContentLoaded', () => {
-            // ランキングデータをリセット (デバッグ用)
-            // localStorage.removeItem(RANKING_KEY);
-            // console.log('ランキングデータがリセットされました。');
-
             resizeGameContainer();
             startButtonContainer.style.display = 'flex';
             document.getElementById('ui').style.display = 'none';
@@ -1489,7 +1532,7 @@
             document.getElementById('mobileControls').style.display = 'none';
             explanationOverlay.style.display = 'none'; // 説明画面も最初は非表示に
             playerNameErrorMessage.style.visibility = 'hidden'; // エラーメッセージの初期状態を非表示に設定
-            displayRankings(); // 初期表示でランキングを表示
+            fetchAndDisplayRankings(); // 初期表示でランキングをGoogle Apps Scriptから取得して表示
 
             // ResizeObserverのセットアップをDOMContentLoaded時に行う
             setupResizeObservers();
@@ -1509,8 +1552,8 @@
 
             gameState.playerName = playerName.substring(0, 10); // 最大10文字に制限
 
-            // 最後に記録されたスコアのタイムスタンプを保存（同点処理用）
-            gameState.lastScoreTimestamp = Date.now();
+            // 最後に記録されたスコアのタイムスタンプを保存（Google Apps Script側で処理されるため、ここでは不要だが残しておく）
+            // gameState.lastScoreTimestamp = Date.now();
 
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1547,8 +1590,7 @@
             explanationOverlay.style.display = 'none'; // 説明画面を非表示
             startButtonContainer.style.display = 'flex'; // スタート画面を再表示
             // スタート画面に戻った時にもメインタイトルフォントサイズを調整
-            // ResizeObserver が自動で処理するのでここでの明示的な呼び出しは不要になる
-            // adjustTextFontSizeSmart(mainTitle, 60, 10, 0.98);
+            // ResizeObserver が自動で処理するので...
         });
     </script>
 </body>
