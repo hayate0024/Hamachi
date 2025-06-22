@@ -88,7 +88,7 @@
             font-weight: bold;
             image-rendering: crisp-edges;
             image-rendering: pixelated;
-            -ms-interpolation-mode: nearest-neighbor;
+            -ms-interpolation-mode: nearest_neighbor;
             text-shadow: 2px 2px #990033; /* ゲームオーバーテキストの影を深いピンクに変更 */
             box-shadow: 0 0 20px rgba(255, 102, 153, 0.5); /* 視覚的に強調 */
         }
@@ -714,6 +714,9 @@
         const mainTitle = document.getElementById('mainTitle');
         const explanationTitle = document.getElementById('explanationTitle');
 
+        // ★★★ ここにあなたのGASウェブアプリのURLを貼り付けてください ★★★
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbybopDER4x4-PS0aicfJPHw4s7d2rQuuDOHbo7FFNWj-rg0edtrXQsnYC76VKgNVgZn/exec'; // 例: 'https://script.google.com/macros/s/AKfycbzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz/exec';
+
         const ORIGINAL_CANVAS_WIDTH = 800;
         const ORIGINAL_CANVAS_HEIGHT = 800;
 
@@ -940,7 +943,7 @@
             gameState.score = 0;
             gameState.lives = 3;
             gameState.level = 1;
-            gameState.playerName = '名無し'; // プレイヤー名を追加
+            gameState.playerName = '名無し'; // プレイヤー名を追加 (これはゲーム開始時に入力値で上書きされる)
             gameState.gameOver = false;
             gameState.keys = {};
             gameState.lastShootTime = 0;
@@ -1123,7 +1126,7 @@
                 gameContainer.style.display = 'none';
                 document.getElementById('mobileControls').style.display = 'none';
                 exitButton.style.display = 'none'; // リトライでスタート画面に戻るのでEXITボタンを非表示に
-                displayRankings(); // スタート画面に戻る際にランキングを再表示
+                fetchRankingsFromGAS(); // スタート画面に戻る際にランキングを再表示
             }
         });
 
@@ -1140,7 +1143,7 @@
             document.getElementById('mobileControls').style.display = 'none'; // モバイルコントロールを非表示
             exitButton.style.display = 'none'; // EXITボタンを非表示
             document.getElementById('gameOver').style.display = 'none'; // ゲームオーバー画面も非表示
-            displayRankings(); // ランキングを再表示
+            fetchRankingsFromGAS(); // ランキングを再表示
             if (mainTitle) {
                 mainTitle.style.animationPlayState = 'running'; // タイトル点滅を再開
             }
@@ -1311,9 +1314,12 @@
                    rect1.y + rect2.height > rect2.y;
         }
 
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbybopDER4x4-PS0aicfJPHw4s7d2rQuuDOHbo7FFNWj-rg0edtrXQsnYC76VKgNVgZn/exec';
-
+        // スコアをGASに送信する関数
         async function sendScoreToGAS(playerName, score) {
+            if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
+                console.error("GAS_WEB_APP_URLが設定されていません。スコア送信をスキップします。");
+                return;
+            }
             try {
                 const response = await fetch(GAS_WEB_APP_URL, {
                     method: 'POST',
@@ -1329,27 +1335,25 @@
                 const data = await response.json();
                 console.log('Score sent to GAS:', data);
                 if (data.status === 'success') {
-                    // 成功した場合、ランキングを更新表示
-                    console.log('Fetched rankings:', data);
-                    // ここでfetchedRankingsを使って自分の順位を表示するロジックを追加
-                    displayRankings(rankingsList, data.ranking); // スタート画面のランキングを更新
-                    displayYourRank(data.ranking, gameState.playerName, gameState.score, gameState.lastScoreTimestamp); // ゲームオーバー画面の順位も更新
+                    console.log('スコア送信成功:', data.message);
                 } else {
-                    console.error('Error from GAS:', data.message);
+                    console.error('GASからのエラー:', data.message);
                 }
             } catch (error) {
-                console.error('Error sending score to GAS:', error);
-                // エラー時でもローカルストレージのランキングは表示
-                displayRankings();
-                displayYourRank(getRankings(), gameState.playerName, gameState.score, gameState.lastScoreTimestamp);
+                console.error('スコア送信中にエラーが発生しました:', error);
             }
         }
 
+        // GASからランキングを取得する関数
         async function fetchRankingsFromGAS() {
+            if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
+                console.error("GAS_WEB_APP_URLが設定されていません。ランキング取得をスキップします。");
+                return;
+            }
             try {
                 const response = await fetch(GAS_WEB_APP_URL, {
                     method: 'GET',
-                    mode: 'cors' // CORSを有効にする
+                    mode: 'cors'
                 });
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -1358,13 +1362,20 @@
                 console.log('Fetched rankings:', data);
                 if (data.status === 'success') {
                     displayRankings(rankingsList, data.ranking); // ランキング表示を更新
+                    // ゲームオーバー画面の順位も更新 (ゲームオーバー画面表示時のみ)
+                    if (document.getElementById('gameOver').style.display === 'block') {
+                         // GASから取得したランキングデータを使用して、自分の順位を表示
+                        displayYourRank(data.ranking, gameState.playerName, gameState.score, gameState.lastScoreTimestamp);
+                    }
                 } else {
-                    console.error('Error fetching rankings from GAS:', data.message);
+                    console.error('GASからのランキング取得エラー:', data.message);
+                    // エラー時でもローカルストレージのランキングは表示 (今回はGAS連携に集中するためローカルストレージは不使用)
+                    displayRankings(rankingsList, []); // ランキングがないことを明示的に表示
                 }
             } catch (error) {
-                console.error('Error fetching rankings from GAS:', error);
-                // エラー時でもローカルストレージのランキングを表示
-                displayRankings();
+                console.error('ランキング取得中にエラーが発生しました:', error);
+                // エラー時でもローカルストレージのランキングは表示 (今回はGAS連携に集中するためローカルストレージは不使用)
+                displayRankings(rankingsList, []); // ランキングがないことを明示的に表示
             }
         }
 
@@ -1374,9 +1385,14 @@
             document.getElementById('finalScore').textContent = gameState.score;
             playBeep(100, 'triangle', 0.5, 0.9);
 
-            // スコアを保存
+            // スコアをGASに送信
             gameState.lastScoreTimestamp = Date.now(); // タイムスタンプをゲームオーバー時に設定
-            sendScoreToGAS(gameState.playerName, gameState.score); // GASに送信
+            sendScoreToGAS(gameState.playerName, gameState.score)
+                .then(() => {
+                    // スコア送信後にランキングを再取得して表示
+                    fetchRankingsFromGAS();
+                });
+
             exitButton.style.display = 'none'; // ゲームオーバー時にEXITボタンを非表示
         }
 
@@ -1531,40 +1547,13 @@
             animationFrameId = requestAnimationFrame(gameLoop);
         }
 
-        // --- スコアランキング機能 ---
-        const RANKING_KEY = 'spaceInvadersRankings';
+        // --- スコアランキング機能 (GASから取得) ---
 
-        function getRankings() {
-            const rankings = JSON.parse(localStorage.getItem(RANKING_KEY) || '[]');
-            // スコアが高い順にソート。スコアが同じ場合は、より新しいタイムスタンプが上の順位になるようにソート
-            return rankings.sort((a, b) => {
-                if (b.score !== a.score) {
-                    return b.score - a.score;
-                }
-                return b.timestamp - a.timestamp; // 新しいタイムスタンプが上に
-            });
-        }
-
-        function saveScoreLocal(name, score, timestamp) {
-            const rankings = getRankings();
-            const newScoreEntry = { name: name, score: score, timestamp: timestamp };
-            rankings.push(newScoreEntry);
-            localStorage.setItem(RANKING_KEY, JSON.stringify(rankings));
-            // スコア保存後にもう一度ランキングをソート
-            rankings.sort((a, b) => {
-                if (b.score !== a.score) {
-                    return b.score - a.score;
-                }
-                return b.timestamp - a.timestamp;
-            });
-        }
-
-        function displayRankings(targetListElement = rankingsList, rankingsData = null) {
-            const rankings = rankingsData || getRankings(); // 引数があればそれを使用、なければローカルストレージから
+        function displayRankings(targetListElement, rankingsData) {
             targetListElement.innerHTML = ''; // リストをクリア
 
             // ランキングは上位3位まで
-            const top3 = rankings.slice(0, 3);
+            const top3 = rankingsData.slice(0, 3);
 
             if (top3.length === 0) {
                 const li = document.createElement('li');
@@ -1581,38 +1570,34 @@
         }
 
         function displayYourRank(rankingsData, playerName, currentScore, currentTimestamp) {
-            const rankings = rankingsData || getRankings();
-            let yourRank = '圏外';
-            let foundIndex = -1;
+            let yourRankText = '圏外';
+            let foundRankIndex = -1;
 
-            // 自分のスコアがランキングのどこに位置するかを探す
-            for (let i = 0; i < rankings.length; i++) {
-                // スコアと、名前、タイムスタンプが一致する（つまり自分のエントリ）を見つける
-                if (rankings[i].score === currentScore &&
-                    rankings[i].name === playerName &&
-                    rankings[i].timestamp === currentTimestamp) {
-                    foundIndex = i;
+            // 自分のスコアがランキングに存在するか確認
+            for (let i = 0; i < rankingsData.length; i++) {
+                // 名前、スコア、タイムスタンプが全て一致するエントリを探す（同点・同名時の区別のため）
+                if (rankingsData[i].name === playerName &&
+                    rankingsData[i].score === currentScore &&
+                    rankingsData[i].timestamp === currentTimestamp) {
+                    foundRankIndex = i;
                     break;
                 }
             }
 
-            if (foundIndex !== -1) {
-                yourRank = `${foundIndex + 1}位`;
+            if (foundRankIndex !== -1) {
+                yourRankText = `${foundRankIndex + 1}位`;
             } else {
-                // スコアがランキングにない場合（例えば、ランキング外の場合）
-                // ただし、このゲームでは全てのスコアが保存されるので、基本的にはここには来ないはずだが、念のため
-                yourRank = `${rankings.length + 1}位`; // 最下位より一つ下、という表現
+                // スコアがランキングに登録されなかった、またはランキング外の場合
+                // 実際にはGASが全てのスコアを返してくるはずなので、通常はここに到達しないが念のため
+                yourRankText = `${rankingsData.length + 1}位 (未登録または圏外)`;
             }
-            yourRankDisplay.textContent = `あなたの順位: ${yourRank}`;
+
+            yourRankDisplay.textContent = `あなたの順位: ${yourRankText}`;
         }
 
 
         // ページのロードが完了したら、スタート画面を表示
         document.addEventListener('DOMContentLoaded', () => {
-            // ランキングデータをリセット (デバッグ用)
-            // localStorage.removeItem(RANKING_KEY);
-            // console.log('ランキングデータがリセットされました。');
-
             resizeGameContainer();
             startButtonContainer.style.display = 'flex';
             document.getElementById('ui').style.display = 'none';
@@ -1644,9 +1629,8 @@
 
             gameState.playerName = playerName.substring(0, 10); // 最大10文字に制限
 
-            // 最後に記録されたスコアのタイムスタンプを保存（同点処理用）
-            // ゲームオーバー時に設定するように変更したので、ここでは不要
-            // gameState.lastScoreTimestamp = Date.now();
+            // ライフが0になった際にスコアを送信するため、タイムスタンプをここでリセット
+            gameState.lastScoreTimestamp = 0; // ゲーム開始時はリセット
 
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
