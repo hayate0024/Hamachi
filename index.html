@@ -221,6 +221,68 @@
             line-height: 1.2; /* 行の高さを調整 */
             margin-left: auto; /* 中央寄せを確実に */
             margin-right: auto; /* 中央寄せを確実に */
+
+            /* 点滅アニメーション */
+            animation: retro-blink 1.6s steps(1, end) infinite; /* 2倍遅く */
+        }
+
+        @keyframes retro-blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; } /* 不透明度の変化を小さく */
+            100% { opacity: 1; }
+        }
+
+        #startButton, #explainButton {
+            /* padding, font-size, width, height を調整 */
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+            box-shadow: 4px 4px 0px 0px rgba(0, 102, 0, 0.7);
+            /* margin-top: 10px; REMOVED: 各ボタンで個別に設定 */
+            box-sizing: border-box; /* paddingとborderを幅に含める */
+            text-align: center; /* 文字を中央揃えに */
+        }
+
+        /* ゲームスタートボタンの黄色化 */
+        #startButton {
+            background-color: #ffcc00; /* 黄色 */
+            color: #fff; /* 文字色を白に調整 */
+            border: 2px solid #cc9900; /* 暗めの黄色 */
+            text-shadow: 3px 3px #996600; /* 影を濃く */
+            box-shadow: 4px 4px 0px 0px rgba(204, 153, 0, 0.7); /* 黄色の影 */
+            padding: 12px 25px; /* サイズ調整 */
+            font-size: clamp(14px, 3vw, 26px); /* サイズ調整 */
+            width: clamp(180px, 40vw, 280px); /* サイズ調整 */
+            margin-top: 20px; /* ここを10pxから20pxに増やす */
+        }
+        #startButton:hover {
+            background-color: #cc9900; /* ホバー時も暗めの黄色 */
+        }
+
+        /* ゲーム説明ボタンは既存の緑色を維持 */
+        #explainButton {
+            background-color: #009900;
+            color: #fff; /* 文字色は白を維持 */
+            border: 2px solid #006600;
+            text-shadow: 2px 2px #006600;
+            /* 名前入力欄の幅に合わせる */
+            width: clamp(150px, 40vw, 250px); /* playerNameInputと同じ幅 */
+            height: clamp(35px, 7vw, 50px); /* スタートボタンより少し小さめ */
+            padding: 8px 15px; /* パディングを調整 */
+            font-size: clamp(12px, 2.5vw, 20px); /* フォントサイズを調整 */
+            margin-top: 10px; /* 元々あったマージンは維持 */
+        }
+        #explainButton:hover {
+            background-color: #006600;
+        }
+
+        /* 名前入力とエラーメッセージのコンテナ */
+        #playerNameSection {
+            margin-top: 30px; /* 上のボタンとの間にスペースを増やす */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
 
         #playerNameInput {
@@ -259,44 +321,6 @@
             justify-content: center;
             line-height: 1.2; /* テキストが表示された際の行の高さ */
             box-sizing: border-box; /* paddingを含めて高さを計算 */
-        }
-
-        #startButton, #explainButton {
-            padding: 15px 30px; /* ボタンのパディングを統一 */
-            font-size: clamp(16px, 3.5vw, 30px); /* レスポンシブ対応 */
-            color: #000; /* スタートボタンに合わせてデフォルト文字色を黒に */
-            border-radius: 10px;
-            cursor: pointer;
-            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
-            box-shadow: 4px 4px 0px 0px rgba(0, 102, 0, 0.7);
-            margin-top: 10px; /* ボタン間のマージン */
-            /* ボタンの幅を統一する */
-            width: clamp(200px, 45vw, 300px); /* レスポンシブに対応しつつ、ある程度の幅を確保 */
-            box-sizing: border-box; /* paddingとborderを幅に含める */
-            text-align: center; /* 文字を中央揃えに */
-        }
-
-        /* ゲームスタートボタンの黄色化 */
-        #startButton {
-            background-color: #ffcc00; /* 黄色 */
-            color: #000; /* 文字色を黒に調整 */
-            border: 2px solid #cc9900; /* 暗めの黄色 */
-            text-shadow: 2px 2px #cc9900; /* 暗めの黄色 */
-            box-shadow: 4px 4px 0px 0px rgba(204, 153, 0, 0.7); /* 黄色の影 */
-        }
-        #startButton:hover {
-            background-color: #cc9900; /* ホバー時も暗めの黄色 */
-        }
-
-        /* ゲーム説明ボタンは既存の緑色を維持 */
-        #explainButton {
-            background-color: #009900;
-            color: #fff; /* 文字色は白を維持 */
-            border: 2px solid #006600;
-            text-shadow: 2px 2px #006600;
-        }
-        #explainButton:hover {
-            background-color: #006600;
         }
 
         #rankingsContainer {
@@ -445,6 +469,27 @@
             box-shadow: 2px 2px 0px 0px rgba(0, 51, 0, 0.7); /* ブロックの影 */
         }
 
+        /* EXITボタンのスタイル */
+        #exitButton {
+            position: fixed; /* 画面固定 */
+            bottom: 10px; /* 画面下からの位置 */
+            right: 10px; /* 画面右からの位置 */
+            padding: 8px 15px;
+            background-color: #990000; /* 赤系の色 */
+            color: #fff;
+            border: 2px solid #660000;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+            font-size: clamp(12px, 2vw, 16px);
+            text-shadow: 1px 1px #330000;
+            z-index: 1000; /* 他の要素よりも手前に表示 */
+            display: none; /* ゲーム開始まで非表示 */
+        }
+        #exitButton:hover {
+            background-color: #660000;
+        }
+
 
         @media (min-width: 600px) {
             #instructions {
@@ -492,17 +537,22 @@
             <button id="rightButton" class="control-button">→</button>
         </div>
     </div>
+    <button id="exitButton" style="display: none;">EXIT</button>
 
     <div id="startButtonContainer">
         <h1 id="mainTitle">ハマチ カンパチ シュート</h1>
-        <input type="text" id="playerNameInput" placeholder="名前を入力">
-        <div id="playerNameErrorMessage"></div>
-        <button id="startButton">
-            ゲームスタート
-        </button>
         <button id="explainButton">
             ゲーム説明
         </button>
+        <button id="startButton">
+            ゲームスタート
+        </button>
+
+        <div id="playerNameSection">
+            <input type="text" id="playerNameInput" placeholder="名前を入力">
+            <div id="playerNameErrorMessage"></div>
+        </div>
+
         <div id="rankingsContainer">
             <h3>ランキング</h3>
             <ul id="rankingsList">
@@ -658,6 +708,7 @@
         const playerNameInput = document.getElementById('playerNameInput'); // プレイヤー名入力フィールド
         const playerNameErrorMessage = document.getElementById('playerNameErrorMessage'); // 名前入力エラーメッセージ
         const yourRankDisplay = document.getElementById('yourRank'); // ゲームオーバー画面の順位表示
+        const exitButton = document.getElementById('exitButton'); // EXITボタンの取得
 
         // タイトルと説明タイトルの要素を取得
         const mainTitle = document.getElementById('mainTitle');
@@ -889,6 +940,7 @@
             gameState.score = 0;
             gameState.lives = 3;
             gameState.level = 1;
+            gameState.playerName = '名無し'; // プレイヤー名を追加
             gameState.gameOver = false;
             gameState.keys = {};
             gameState.lastShootTime = 0;
@@ -900,6 +952,7 @@
             gameState.player.x = gameState.playerTargetPositions[gameState.currentPlayerTargetIndex] - gameState.player.width / 2;
 
             document.getElementById('gameOver').style.display = 'none';
+            exitButton.style.display = 'block'; // ゲーム開始時にEXITボタンを表示
             updateUI();
         }
 
@@ -1069,9 +1122,30 @@
                 document.getElementById('ui').style.display = 'none';
                 gameContainer.style.display = 'none';
                 document.getElementById('mobileControls').style.display = 'none';
+                exitButton.style.display = 'none'; // リトライでスタート画面に戻るのでEXITボタンを非表示に
                 displayRankings(); // スタート画面に戻る際にランキングを再表示
             }
         });
+
+        // EXITボタンのイベントリスナー
+        exitButton.addEventListener('click', () => {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId); // ゲームループを停止
+            }
+            // ゲーム状態をリセット（必要に応じて）
+            gameState.gameOver = true; // ゲームオーバー状態にして、次回スタート時にリセットされるようにする
+            startButtonContainer.style.display = 'flex'; // スタート画面を表示
+            document.getElementById('ui').style.display = 'none'; // UIを非表示
+            gameContainer.style.display = 'none'; // ゲームコンテナを非表示
+            document.getElementById('mobileControls').style.display = 'none'; // モバイルコントロールを非表示
+            exitButton.style.display = 'none'; // EXITボタンを非表示
+            document.getElementById('gameOver').style.display = 'none'; // ゲームオーバー画面も非表示
+            displayRankings(); // ランキングを再表示
+            if (mainTitle) {
+                mainTitle.style.animationPlayState = 'running'; // タイトル点滅を再開
+            }
+        });
+
 
         function movePlayer(direction) {
             const newIndex = gameState.currentPlayerTargetIndex + direction * PLAYER_GRID_MOVE_AMOUNT;
@@ -1237,7 +1311,7 @@
                    rect1.y + rect2.height > rect2.y;
         }
 
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbybopDER4x4-PS0aicfJPHw4s7d2rQuuDOHbo7FFNWj-rg0edtrXQsnYC76VKgNVgZn/exec'; // ★★★ 新しいURLに更新 ★★★
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbybopDER4x4-PS0aicfJPHw4s7d2rQuuDOHbo7FFNWj-rg0edtrXQsnYC76VKgNVgZn/exec';
 
         async function sendScoreToGAS(playerName, score) {
             try {
@@ -1303,6 +1377,7 @@
             // スコアを保存
             gameState.lastScoreTimestamp = Date.now(); // タイムスタンプをゲームオーバー時に設定
             sendScoreToGAS(gameState.playerName, gameState.score); // GASに送信
+            exitButton.style.display = 'none'; // ゲームオーバー時にEXITボタンを非表示
         }
 
         function checkLevelUp() {
@@ -1543,12 +1618,16 @@
             document.getElementById('ui').style.display = 'none';
             gameContainer.style.display = 'none';
             document.getElementById('mobileControls').style.display = 'none';
+            exitButton.style.display = 'none'; // 初期表示では非表示
             explanationOverlay.style.display = 'none'; // 説明画面も最初は非表示に
             playerNameErrorMessage.style.visibility = 'hidden'; // エラーメッセージの初期状態を非表示に設定
             fetchRankingsFromGAS(); // 初期表示でGASからランキングを取得して表示
 
             // ResizeObserverのセットアップをDOMContentLoaded時に行う
             setupResizeObservers();
+            if (mainTitle) {
+                mainTitle.style.animationPlayState = 'running'; // タイトル点滅を開始
+            }
         });
 
         // スタートボタンがクリックされた時の処理
@@ -1582,30 +1661,35 @@
             } else {
                 document.getElementById('mobileControls').style.display = 'none';
             }
-
+            exitButton.style.display = 'block'; // ゲーム開始時にEXITボタンを表示
             init();
             if (animationFrameId) {
                 cancelAnimationFrame(animationFrameId);
             }
             gameLoop();
+            if (mainTitle) {
+                mainTitle.style.animationPlayState = 'paused'; // ゲーム開始で点滅を一時停止
+                mainTitle.style.opacity = 1; // 完全に表示された状態に
+            }
         });
 
         // 説明ボタンがクリックされた時の処理
         explainButton.addEventListener('click', () => {
             startButtonContainer.style.display = 'none'; // スタート画面を非表示
             explanationOverlay.style.display = 'flex'; // 説明画面を表示
-            // 説明画面表示時にもタイトルフォントサイズを調整
-            // ResizeObserver が自動で処理するのでここでの明示的な呼び出しは不要になる
-            // adjustTextFontSizeSmart(explanationTitle, 32, 10, 0.98);
+            if (mainTitle) {
+                mainTitle.style.animationPlayState = 'paused'; // 説明画面表示で点滅を一時停止
+                mainTitle.style.opacity = 1; // 完全に表示された状態に
+            }
         });
 
         // 説明画面の閉じるボタンがクリックされた時の処理
         closeExplanationButton.addEventListener('click', () => {
             explanationOverlay.style.display = 'none'; // 説明画面を非表示
             startButtonContainer.style.display = 'flex'; // スタート画面を再表示
-            // スタート画面に戻った時にもメインタイトルフォントサイズを調整
-            // ResizeObserver が自動で処理するのでここでの明示的な呼び出しは不要になる
-            // adjustTextFontSizeSmart(mainTitle, 60, 10, 0.98);
+            if (mainTitle) {
+                mainTitle.style.animationPlayState = 'running'; // スタート画面に戻ったら点滅を再開
+            }
         });
     </script>
 </body>
