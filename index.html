@@ -787,12 +787,13 @@
 
         /**
          * 指定されたテキスト要素のフォントサイズを動的に調整し、親要素の幅に収める関数。
+         * バイナリサーチ（二分探索）を使用して効率的に最適なフォントサイズを見つけます。
          * @param {HTMLElement} element - フォントサイズを調整するテキスト要素。
          * @param {number} maxFontSize - 設定できる最大のフォントサイズ。
          * @param {number} minFontSize - 設定できる最小のフォントサイズ。
+         * @param {number} paddingFactor - 親要素の幅に対してどれだけの余裕を持たせるか (例: 0.98 で 98% に収める)。
          */
-        function adjustTextFontSize(element, maxFontSize, minFontSize = 5) {
-            // テキストの描画に必要な一時的なキャンバスコンテキスト
+        function adjustTextFontSizeSmart(element, maxFontSize, minFontSize = 5, paddingFactor = 0.98) {
             const tempCanvas = document.createElement('canvas');
             const tempCtx = tempCanvas.getContext('2d');
             tempCtx.imageSmoothingEnabled = false;
@@ -802,39 +803,66 @@
             const parentWidth = element.parentElement.clientWidth;
             const textContent = element.textContent;
 
-            let currentFontSize = maxFontSize;
+            // 親要素のパディングを考慮した利用可能な幅
+            const computedStyle = getComputedStyle(element.parentElement);
+            const availableWidth = parentWidth - (parseFloat(computedStyle.paddingLeft) || 0) - (parseFloat(computedStyle.paddingRight) || 0);
 
-            // まず最大フォントサイズを設定
-            element.style.fontSize = `${maxFontSize}px`;
-            // 親要素のパディングを考慮してテキストが収まる最大幅を計算
-            const availableWidth = parentWidth - (parseFloat(getComputedStyle(element.parentElement).paddingLeft) || 0) - (parseFloat(getComputedStyle(element.parentElement).paddingRight) || 0);
+            let low = minFontSize;
+            let high = maxFontSize;
+            let optimalFontSize = minFontSize;
 
-            // フォントサイズを下げていき、テキストが収まるか、最小フォントサイズに達するまで繰り返す
-            while (currentFontSize >= minFontSize) {
-                tempCtx.font = `${currentFontSize}px 'DotGothic16', 'Press Start 2P', cursive, monospace`;
+            while (low <= high) {
+                let mid = Math.floor((low + high) / 2);
+                tempCtx.font = `${mid}px 'DotGothic16', 'Press Start 2P', cursive, monospace`;
                 const textWidth = tempCtx.measureText(textContent).width;
 
-                if (textWidth <= availableWidth * 0.95) { // 95%に収まるように少し余裕を持たせる
-                    element.style.fontSize = `${currentFontSize}px`;
-                    return; // 収まったので終了
+                if (textWidth <= availableWidth * paddingFactor) {
+                    optimalFontSize = mid; // 現在のフォントサイズは収まるので、これを暫定の最適解とし、より大きなサイズを試す
+                    low = mid + 1;
+                } else {
+                    high = mid - 1; // 収まらないので、より小さなサイズを試す
                 }
-                currentFontSize -= 1; // 1pxずつ減らす
             }
-            // 最小フォントサイズでも収まらない場合、最小フォントサイズを設定
-            element.style.fontSize = `${minFontSize}px`;
+            element.style.fontSize = `${optimalFontSize}px`;
         }
 
+
+        // ResizeObserverを導入
+        let mainTitleObserver;
+        let explanationTitleObserver;
+
+        function setupResizeObservers() {
+            if (mainTitleObserver) mainTitleObserver.disconnect();
+            if (explanationTitleObserver) explanationTitleObserver.disconnect();
+
+            mainTitleObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    if (entry.target === mainTitle) {
+                        adjustTextFontSizeSmart(mainTitle, 60, 10, 0.98); // 最小10px、余裕0.98
+                    }
+                }
+            });
+            explanationTitleObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    if (entry.target === explanationTitle) {
+                        adjustTextFontSizeSmart(explanationTitle, 32, 10, 0.98); // 最小10px、余裕0.98
+                    }
+                }
+            });
+
+            mainTitleObserver.observe(mainTitle.parentElement); // タイトルの親要素を監視
+            explanationTitleObserver.observe(explanationTitle.parentElement); // 説明タイトルの親要素を監視
+        }
 
         window.addEventListener('resize', () => {
             // ゲーム画面またはスタート画面が表示されている場合のみリサイズ処理を実行
             if (gameContainer.style.display !== 'none' || startButtonContainer.style.display !== 'none') {
                 init();
             } else {
-                resizeGameContainer(); // それ以外の場合は、単にコンテナサイズを調整（タイトルが表示されない原因ではありません）
+                resizeGameContainer(); // それ以外の場合は、単にコンテナサイズを調整
             }
-            // 画面サイズ変更時にもタイトルと説明のフォントサイズを調整
-            adjustTextFontSize(mainTitle, 60); // 最大60px
-            adjustTextFontSize(explanationTitle, 32); // 最大32px
+            // ResizeObserverがあるので、手動でのadjustTextFontSize呼び出しは不要
+            // adjustTextFontSizeSmartはResizeObserverが検知して自動で呼び出す
         });
 
         function init() {
@@ -1462,9 +1490,8 @@
             playerNameErrorMessage.style.visibility = 'hidden'; // エラーメッセージの初期状態を非表示に設定
             displayRankings(); // 初期表示でランキングを表示
 
-            // 初期ロード時にタイトルと説明のフォントサイズを調整
-            adjustTextFontSize(mainTitle, 60); // 最大60px
-            adjustTextFontSize(explanationTitle, 32); // 最大32px
+            // ResizeObserverのセットアップをDOMContentLoaded時に行う
+            setupResizeObservers();
         });
 
         // スタートボタンがクリックされた時の処理
@@ -1510,7 +1537,8 @@
             startButtonContainer.style.display = 'none'; // スタート画面を非表示
             explanationOverlay.style.display = 'flex'; // 説明画面を表示
             // 説明画面表示時にもタイトルフォントサイズを調整
-            adjustTextFontSize(explanationTitle, 32);
+            // ResizeObserver が自動で処理するのでここでの明示的な呼び出しは不要になる
+            // adjustTextFontSizeSmart(explanationTitle, 32, 10, 0.98);
         });
 
         // 説明画面の閉じるボタンがクリックされた時の処理
@@ -1518,7 +1546,8 @@
             explanationOverlay.style.display = 'none'; // 説明画面を非表示
             startButtonContainer.style.display = 'flex'; // スタート画面を再表示
             // スタート画面に戻った時にもメインタイトルフォントサイズを調整
-            adjustTextFontSize(mainTitle, 60);
+            // ResizeObserver が自動で処理するのでここでの明示的な呼び出しは不要になる
+            // adjustTextFontSizeSmart(mainTitle, 60, 10, 0.98);
         });
     </script>
 </body>
