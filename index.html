@@ -106,7 +106,7 @@
             cursor: pointer;
             border-radius: 5px;
             margin-top: 15px;
-            font-family: 'DotGothic16', 'Press Start2P', cursive, monospace;
+            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
             font-weight: bold;
             image-rendering: crisp-edges;
             image-rendering: pixelated;
@@ -232,7 +232,7 @@
             100% { opacity: 1; }
         }
 
-        #startButton, #explainButton {
+        #startButton, #explainButton, #rankingButton { /* #rankingButton を追加 */
             /* padding, font-size, width, height を調整 */
             border-radius: 10px;
             cursor: pointer;
@@ -260,7 +260,7 @@
         }
 
         /* ゲーム説明ボタンは既存の緑色を維持 */
-        #explainButton {
+        #explainButton, #rankingButton { /* #rankingButton にも同じスタイルを適用 */
             background-color: #009900;
             color: #fff; /* 文字色は白を維持 */
             border: 2px solid #006600;
@@ -272,7 +272,7 @@
             font-size: clamp(12px, 2.5vw, 20px); /* フォントサイズを調整 */
             margin-top: 10px; /* 元々あったマージンは維持 */
         }
-        #explainButton:hover {
+        #explainButton:hover, #rankingButton:hover { /* #rankingButton にも同じホバー効果を適用 */
             background-color: #006600;
         }
 
@@ -518,6 +518,61 @@
                 display: none;
             }
         }
+
+        /* --- ここから追加したCSS --- */
+        /* スプレッドシートオーバーレイの基本スタイル */
+        #spreadsheetOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9); /* 半透明の黒背景、少し濃いめ */
+            display: none; /* 初期状態は非表示 */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* 他の要素より手前に表示 */
+            flex-direction: column; /* コンテンツとボタンを縦に並べる */
+        }
+
+        .overlay-content {
+            background-color: #000;
+            border: 2px solid #009900;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: hidden;
+            color: #009900;
+        }
+
+        .overlay-content iframe {
+            width: 450px;
+            height: 160px;
+            border: none; /* iframeの枠線を消す */
+            display: block;
+            margin: 0 auto;
+            overflow: auto; /* iframe自体のスクロールバーを必要に応じて表示 */
+        }
+
+        .overlay-content .close-button {
+             background-color: #009900;
+            color: #fff;
+            border: 2px solid #006600;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 15px; /* iframeの下にマージンを調整 */
+            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+        }
+
+        .overlay-content .close-button:hover {
+            background-color: #006600;
+        }
+        /* --- ここまで追加したCSS --- */
+
     </style>
 </head>
 <body>
@@ -560,6 +615,10 @@
             <input type="text" id="playerNameInput" placeholder="名前を入力">
             <div id="playerNameErrorMessage"></div>
         </div>
+
+        <button id="rankingButton" style="margin-top: 10px;">
+            ランキング
+        </button>
 
         <div id="rankingsContainer">
             <h3>あなたの最高得点</h3>
@@ -652,7 +711,7 @@
                     <ul>
                         <li>ショッコ/シオッコ: 10～20cm程度の幼魚。非常に小さい段階。</li>
                         <li>シオ: 20～30cm程度の若魚。</li>
-                        <li>アカバナ/アカバネ: 30～40cm程度の魚。体色が少し赤みを帯びることに由来。</li>
+                        <li>アカバナ/アカバネ: 30～40cm程度の魚。体色が少し赤みを帯びることに由来。
                         <li>カンパチ: 50cm以上の成魚。</li>
                     </ul>
                 </li>
@@ -700,6 +759,12 @@
         </div>
     </div>
 
+    <div id="spreadsheetOverlay" class="overlay">
+        <div class="overlay-content">
+            <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRa0Q9xStdlDqAY18a_bpeyoGskywpikXjWiLNS9LKW_Km9Mg2uATO-vpVZhA_62JUde483QB4FSNUg/pubhtml?gid=493938141&amp;single=true&amp;widget=false&amp;headers=false&amp;gridlines=false&amp;range=A1:E6&amp;chrome=false"></iframe>
+            <button id="closeSpreadsheetButton" class="close-button">閉じる</button>
+        </div>
+    </div>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -708,6 +773,7 @@
         const startButtonContainer = document.getElementById('startButtonContainer');
         const startButton = document.getElementById('startButton');
         const explainButton = document.getElementById('explainButton'); // 説明ボタン
+        const rankingButton = document.getElementById('rankingButton'); // ランキングボタンを追加
         const explanationOverlay = document.getElementById('explanationOverlay'); // 説明画面
         const closeExplanationButton = document.getElementById('closeExplanationButton'); // 説明画面を閉じるボタン
         const rankingsContainer = document.getElementById('rankingsContainer'); // ランキングコンテナ（親要素）
@@ -716,6 +782,12 @@
         const playerNameErrorMessage = document.getElementById('playerNameErrorMessage'); // 名前入力エラーメッセージ
         const yourRankDisplay = document.getElementById('yourRank'); // ゲームオーバー画面の順位表示
         const exitButton = document.getElementById('exitButton'); // EXITボタンの取得
+
+        // --- ここから追加 ---
+        // スプレッドシートオーバーレイ関連の要素を取得
+        const spreadsheetOverlay = document.getElementById('spreadsheetOverlay');
+        const closeSpreadsheetButton = document.getElementById('closeSpreadsheetButton');
+        // --- ここまで追加 ---
 
         // タイトルと説明タイトルの要素を取得
         const mainTitle = document.getElementById('mainTitle');
@@ -1061,7 +1133,7 @@
 
         document.addEventListener('keydown', (e) => {
             // 説明画面が表示されている場合は、キー入力を無効化
-            if (explanationOverlay.style.display === 'flex') return;
+            if (explanationOverlay.style.display === 'flex' || spreadsheetOverlay.style.display === 'flex') return;
 
             if (gameState.gameOver) return;
 
@@ -1095,7 +1167,7 @@
 
         document.addEventListener('keyup', (e) => {
             // 説明画面が表示されている場合は、キー入力を無効化
-            if (explanationOverlay.style.display === 'flex') return;
+            if (explanationOverlay.style.display === 'flex' || spreadsheetOverlay.style.display === 'flex') return;
 
             gameState.keys[e.key] = false;
         });
@@ -1547,6 +1619,7 @@
             document.getElementById('mobileControls').style.display = 'none';
             exitButton.style.display = 'none'; // 初期表示では非表示
             explanationOverlay.style.display = 'none'; // 説明画面も最初は非表示に
+            spreadsheetOverlay.style.display = 'none'; // ランキングオーバーレイも非表示
             playerNameErrorMessage.style.visibility = 'hidden'; // エラーメッセージの初期状態を非表示に設定
             loadHighScore(); // 最高得点を読み込んで表示
 
@@ -1615,6 +1688,19 @@
                 mainTitle.style.animationPlayState = 'running'; // スタート画面に戻ったら点滅を再開
             }
         });
+
+        // --- ここから追加/修正したJavaScript ---
+        // ランキングボタンのイベントリスナー
+        rankingButton.addEventListener('click', () => {
+            spreadsheetOverlay.style.display = 'flex'; // スプレッドシートのオーバーレイを表示
+        });
+
+        // スプレッドシートを閉じるボタンのイベントリスナー
+        closeSpreadsheetButton.addEventListener('click', () => {
+            spreadsheetOverlay.style.display = 'none'; // スプレッドシートのオーバーレイを非表示
+        });
+        // --- ここまで追加/修正したJavaScript ---
+
     </script>
 </body>
 </html>
