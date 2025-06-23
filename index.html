@@ -232,14 +232,15 @@
             100% { opacity: 1; }
         }
 
-        #startButton, #explainButton, #rankingButton { /* rankingButton も含める */
+        #startButton, #explainButton {
+            /* padding, font-size, width, height を調整 */
             border-radius: 10px;
             cursor: pointer;
             font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
             box-shadow: 4px 4px 0px 0px rgba(0, 102, 0, 0.7);
+            /* margin-top: 10px; REMOVED: 各ボタンで個別に設定 */
             box-sizing: border-box; /* paddingとborderを幅に含める */
             text-align: center; /* 文字を中央揃えに */
-            margin-top: 10px; /* すべてのボタンに共通マージン */
         }
 
         /* ゲームスタートボタンの黄色化 */
@@ -269,23 +270,9 @@
             height: clamp(35px, 7vw, 50px); /* スタートボタンより少し小さめ */
             padding: 8px 15px; /* パディングを調整 */
             font-size: clamp(12px, 2.5vw, 20px); /* フォントサイズを調整 */
+            margin-top: 10px; /* 元々あったマージンは維持 */
         }
         #explainButton:hover {
-            background-color: #006600;
-        }
-
-        /* ランキングボタンのスタイル（説明ボタンと似た見た目に） */
-        #rankingButton {
-            background-color: #009900;
-            color: #fff;
-            border: 2px solid #006600;
-            text-shadow: 2px 2px #006600;
-            width: clamp(150px, 40vw, 250px);
-            height: clamp(35px, 7vw, 50px);
-            padding: 8px 15px;
-            font-size: clamp(12px, 2.5vw, 20px);
-        }
-        #rankingButton:hover {
             background-color: #006600;
         }
 
@@ -481,98 +468,13 @@
             background-color: #006600;
         }
 
-        /* ランキング画面のスタイル (explanationOverlay と類似) */
-        #rankingOverlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            color: #fff;
-            padding: 20px;
-            box-sizing: border-box;
-            display: none; /* 初期は非表示 */
-            text-shadow: 1px 1px #000;
-        }
-
-        #rankingContent {
-            background-color: #003300; /* 説明コンテンツの背景色と同じ */
-            border: 2px solid #009900;
-            border-radius: 8px;
-            padding: 25px;
-            max-width: 700px;
-            max-height: 90vh;
-            overflow-y: auto;
-            text-align: left;
-            box-shadow: 0 0 30px rgba(0, 153, 0, 0.5);
-            color: #ccffcc; /* テキスト色を明るい緑に */
-            font-size: clamp(14px, 2.2vw, 18px);
-        }
-
-        #rankingContent h2 {
-            color: #ffcc00;
-            text-align: center;
-            margin-top: 0;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px #cc9900;
-            white-space: nowrap;
-            max-width: 100%;
-            flex-shrink: 0;
-            width: auto;
-            line-height: 1.2;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        #rankingList {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            text-align: left;
-        }
-
-        #rankingList li {
-            margin-bottom: 8px;
-            padding-bottom: 4px;
-            border-bottom: 1px dashed rgba(0, 153, 0, 0.5); /* 区切り線 */
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            gap: 10px;
-            font-size: clamp(15px, 2.8vw, 22px); /* ランキングの項目サイズ調整 */
-        }
-
-        #rankingList li:last-child {
-            border-bottom: none; /* 最後の項目に線は不要 */
-        }
-
-        #rankingList li .rank-number {
-            color: #ffcc00; /* 順位の数字の色 */
-            font-size: 1.2em; /* 順位の数字を少し大きく */
-            min-width: 30px; /* 順位の列幅を確保 */
-            text-align: right;
-            text-shadow: 1px 1px #cc9900;
-        }
-
-        #rankingList li .rank-name {
-            flex-grow: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: #ccffcc;
-        }
-
-        #rankingList li .rank-score {
-            text-align: right;
-            white-space: nowrap;
-            color: #aaffee; /* スコアの色 */
-            font-weight: bold;
-            text-shadow: 1px 1px #6688aa;
+        /* 敵ブロックの新しいスタイル */
+        .enemy-block {
+            background-color: #006600; /* 濃い緑 */
+            border: 2px solid #003300; /* さらに濃い緑のボーダー */
+            color: #99ff99; /* 明るい緑の文字 */
+            text-shadow: 2px 2px #003300; /* 濃い緑の文字影 */
+            box-shadow: 2px 2px 0px 0px rgba(0, 51, 0, 0.7); /* ブロックの影 */
         }
 
         /* EXITボタンのスタイル */
@@ -596,14 +498,6 @@
             background-color: #660000;
         }
 
-        /* 敵ブロックの新しいスタイル */
-        .enemy-block {
-            background-color: #006600; /* 濃い緑 */
-            border: 2px solid #003300; /* さらに濃い緑のボーダー */
-            color: #99ff99; /* 明るい緑の文字 */
-            text-shadow: 2px 2px #003300; /* 濃い緑の文字影 */
-            box-shadow: 2px 2px 0px 0px rgba(0, 51, 0, 0.7); /* ブロックの影 */
-        }
 
         @media (min-width: 600px) {
             #instructions {
@@ -657,9 +551,6 @@
         <h1 id="mainTitle">ハマチ カンパチ シュート</h1>
         <button id="explainButton">
             ゲーム説明
-        </button>
-        <button id="rankingButton">
-            ランキング
         </button>
         <button id="startButton">
             ゲームスタート
@@ -809,15 +700,6 @@
         </div>
     </div>
 
-    <div id="rankingOverlay">
-        <div id="rankingContent">
-            <h2 id="rankingTitle">ランキング</h2>
-            <ul id="rankingList">
-                </ul>
-            <button class="close-button" id="closeRankingButton">閉じる</button>
-        </div>
-    </div>
-
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -834,13 +716,6 @@
         const playerNameErrorMessage = document.getElementById('playerNameErrorMessage'); // 名前入力エラーメッセージ
         const yourRankDisplay = document.getElementById('yourRank'); // ゲームオーバー画面の順位表示
         const exitButton = document.getElementById('exitButton'); // EXITボタンの取得
-
-        // 新規追加: ランキング関連要素の取得
-        const rankingButton = document.getElementById('rankingButton');
-        const rankingOverlay = document.getElementById('rankingOverlay');
-        const closeRankingButton = document.getElementById('closeRankingButton');
-        const rankingList = document.getElementById('rankingList');
-        const rankingTitle = document.getElementById('rankingTitle');
 
         // タイトルと説明タイトルの要素を取得
         const mainTitle = document.getElementById('mainTitle');
@@ -1019,12 +894,10 @@
         // ResizeObserverを導入
         let mainTitleObserver;
         let explanationTitleObserver;
-        let rankingTitleObserver; // 新規追加: rankingTitle 用の ResizeObserver
 
         function setupResizeObservers() {
             if (mainTitleObserver) mainTitleObserver.disconnect();
             if (explanationTitleObserver) explanationTitleObserver.disconnect();
-            if (rankingTitleObserver) rankingTitleObserver.disconnect(); // 既存のオブザーバーを解除
 
             mainTitleObserver = new ResizeObserver(entries => {
                 for (let entry of entries) {
@@ -1040,17 +913,9 @@
                     }
                 }
             });
-            rankingTitleObserver = new ResizeObserver(entries => { // 新規追加: rankingTitle 用の ResizeObserver
-                for (let entry of entries) {
-                    if (entry.target === rankingTitle) {
-                        adjustTextFontSizeSmart(rankingTitle, 32, 10, 0.98);
-                    }
-                }
-            });
 
             mainTitleObserver.observe(mainTitle.parentElement); // タイトルの親要素を監視
             explanationTitleObserver.observe(explanationTitle.parentElement); // 説明タイトルの親要素を監視
-            rankingTitleObserver.observe(rankingTitle.parentElement); // 新規追加: ランキングタイトルの親要素を監視
         }
 
         window.addEventListener('resize', () => {
@@ -1196,7 +1061,7 @@
 
         document.addEventListener('keydown', (e) => {
             // 説明画面が表示されている場合は、キー入力を無効化
-            if (explanationOverlay.style.display === 'flex' || rankingOverlay.style.display === 'flex') return; // 新規追加: ランキング画面も対象に
+            if (explanationOverlay.style.display === 'flex') return;
 
             if (gameState.gameOver) return;
 
@@ -1230,7 +1095,7 @@
 
         document.addEventListener('keyup', (e) => {
             // 説明画面が表示されている場合は、キー入力を無効化
-            if (explanationOverlay.style.display === 'flex' || rankingOverlay.style.display === 'flex') return; // 新規追加: ランキング画面も対象に
+            if (explanationOverlay.style.display === 'flex') return;
 
             gameState.keys[e.key] = false;
         });
@@ -1287,8 +1152,7 @@
             document.getElementById('mobileControls').style.display = 'none'; // モバイルコントロールを非表示
             exitButton.style.display = 'none'; // EXITボタンを非表示
             document.getElementById('gameOver').style.display = 'none'; // ゲームオーバー画面も非表示
-            loadHighScore(); // 個人最高得点を再表示
-            // fetchAndDisplayRankings(); // ランキングを再表示
+            loadHighScore(); // ランキングを再表示
             if (mainTitle) {
                 mainTitle.style.animationPlayState = 'running'; // タイトル点滅を再開
             }
@@ -1465,11 +1329,7 @@
             document.getElementById('finalScore').textContent = gameState.score;
             playBeep(100, 'triangle', 0.5, 0.9);
 
-            // プレイヤー名が入力されていればグローバルランキングに保存 (新規追加)
-            if (gameState.playerName) {
-                saveGlobalRanking(gameState.playerName, gameState.score);
-            }
-            // 個人の最高得点を保存 (既存)
+            // スコアを保存
             saveHighScore(gameState.score);
 
             // Googleフォームにスコアを送信
@@ -1477,6 +1337,7 @@
 
             // スコア送信機能を削除したため、自分の順位表示は行わない
             yourRankDisplay.textContent = "";
+
 
             exitButton.style.display = 'none'; // ゲームオーバー時にEXITボタンを非表示
         }
@@ -1656,59 +1517,6 @@
             }
         }
 
-        // --- 新規追加: グローバルランキング管理 ---
-        const GLOBAL_RANKINGS_KEY = 'hamachiKanpachiGlobalRankings';
-        const MAX_RANKING_ENTRIES = 10; // 表示するランキングの最大数
-
-        function saveGlobalRanking(playerName, score) {
-            if (!playerName) return; // 名前がない場合は保存しない
-
-            let rankings = JSON.parse(localStorage.getItem(GLOBAL_RANKINGS_KEY) || '[]');
-
-            // 新しいスコアを追加
-            rankings.push({ name: playerName, score: score, timestamp: Date.now() });
-
-            // スコアの高い順にソートし、同点の場合はタイムスタンプで新しい方を優先
-            rankings.sort((a, b) => {
-                if (b.score !== a.score) {
-                    return b.score - a.score; // スコア降順
-                }
-                return b.timestamp - a.timestamp; // タイムスタンプ降順（新しいものが上位）
-            });
-
-            // 上位MAX_RANKING_ENTRIES件のみ保持
-            rankings = rankings.slice(0, MAX_RANKING_ENTRIES);
-
-            localStorage.setItem(GLOBAL_RANKINGS_KEY, JSON.stringify(rankings));
-        }
-
-        function loadGlobalRankings() {
-            return JSON.parse(localStorage.getItem(GLOBAL_RANKINGS_KEY) || '[]');
-        }
-
-        function fetchAndDisplayRankings() {
-            const rankings = loadGlobalRankings();
-            rankingList.innerHTML = ''; // リストをクリア
-
-            if (rankings.length === 0) {
-                const li = document.createElement('li');
-                li.innerHTML = '<span class="rank-name">まだスコアがありません</span>';
-                rankingList.appendChild(li);
-                return;
-            }
-
-            rankings.forEach((entry, index) => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span class="rank-number">${index + 1}.</span>
-                    <span class="rank-name">${entry.name}</span>
-                    <span class="rank-score">${entry.score} 点</span>
-                `;
-                rankingList.appendChild(li);
-            });
-        }
-
-
         // --- Googleフォームへのスコア送信関数 ---
         async function submitScoreToGoogleForm(playerName, score) {
             const formData = new FormData();
@@ -1739,7 +1547,6 @@
             document.getElementById('mobileControls').style.display = 'none';
             exitButton.style.display = 'none'; // 初期表示では非表示
             explanationOverlay.style.display = 'none'; // 説明画面も最初は非表示に
-            rankingOverlay.style.display = 'none'; // 新規追加: ランキング画面も最初は非表示に
             playerNameErrorMessage.style.visibility = 'hidden'; // エラーメッセージの初期状態を非表示に設定
             loadHighScore(); // 最高得点を読み込んで表示
 
@@ -1803,26 +1610,6 @@
         // 説明画面の閉じるボタンがクリックされた時の処理
         closeExplanationButton.addEventListener('click', () => {
             explanationOverlay.style.display = 'none'; // 説明画面を非表示
-            startButtonContainer.style.display = 'flex'; // スタート画面を再表示
-            if (mainTitle) {
-                mainTitle.style.animationPlayState = 'running'; // スタート画面に戻ったら点滅を再開
-            }
-        });
-
-        // --- 新規追加: ランキングボタンのイベントリスナー ---
-        rankingButton.addEventListener('click', () => {
-            startButtonContainer.style.display = 'none'; // スタート画面を非表示
-            rankingOverlay.style.display = 'flex'; // ランキング画面を表示
-            fetchAndDisplayRankings(); // ランキングデータを読み込んで表示
-            if (mainTitle) {
-                mainTitle.style.animationPlayState = 'paused'; // ランキング画面表示で点滅を一時停止
-                mainTitle.style.opacity = 1; // 完全に表示された状態に
-            }
-        });
-
-        // --- 新規追加: ランキング画面の閉じるボタンのイベントリスナー ---
-        closeRankingButton.addEventListener('click', () => {
-            rankingOverlay.style.display = 'none'; // ランキング画面を非表示
             startButtonContainer.style.display = 'flex'; // スタート画面を再表示
             if (mainTitle) {
                 mainTitle.style.animationPlayState = 'running'; // スタート画面に戻ったら点滅を再開
