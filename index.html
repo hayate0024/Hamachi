@@ -210,6 +210,7 @@
         #startButtonContainer h1 {
             color: #ffcc00; /* タイトルの色 */
             /* font-size: clamp(24px, 5vw, 60px); REMOVED: JSで動的に設定 */
+            margin-top: 15px;
             margin-bottom: 20px;
             text-shadow: 3px 3px #cc9900;
             font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
@@ -238,7 +239,6 @@
             cursor: pointer;
             font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
             box-shadow: 4px 4px 0px 0px rgba(0, 102, 0, 0.7);
-            /* margin-top: 10px; REMOVED: 各ボタンで個別に設定 */
             box-sizing: border-box; /* paddingとborderを幅に含める */
             text-align: center; /* 文字を中央揃えに */
         }
@@ -325,7 +325,7 @@
 
         #rankingsContainer {
             margin-top: 30px; /* ボタンの下に移動したのでマージン調整 */
-            margin-bottom: 20px; /* ★この行を追加して、下側に余白を作成 */
+            margin-bottom: 40px; /* ★この行を追加して、下側に余白を作成 */
             padding: 15px;
             background-color: rgba(0,0,0,0.7);
             border: 2px solid #009900;
@@ -577,17 +577,21 @@
         /* --- ランキング画面をレトロPC風にするCSS --- */
 
         /* モニター全体のコンテナ */
-        #spreadsheetOverlay .overlay-content {
-            background-color: #003300; /* ★背景色をゲーム説明画面と同じ濃い緑に変更 */
-            border: 3px solid #1a1a1a;
-            border-top-color: #454545;
-            border-left-color: #454545;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 10px 10px 0px rgba(0, 102, 0, 0.5), inset 0 0 20px rgba(0,0,0,0.6);
-            position: relative;
-            width: auto;
-        }
+        /* 差し替えるCSS */
+  #spreadsheetOverlay .overlay-content {
+      background-color: #003300; /* ★背景色をゲーム説明画面と同じ濃い緑に変更 */
+      border: 2px solid #009900;  /* ★ゲーム説明画面と同じ黄緑の枠線に変更 */
+      border-radius: 8px;
+      padding: 25px;
+      /* box-shadowと古いborder指定を削除 */
+      position: relative;
+      width: auto;
+      text-align: center;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: hidden;
+      color: #009900;
+  }
 /* iframe（画面部分）のスタイル */
 #spreadsheetOverlay iframe {
     width: 295px;
@@ -631,6 +635,67 @@
     overflow: hidden;
 }
     z-index: 1;
+
+    /* 既存の #startButtonContainer h1 のスタイルをこちらに差し替え */
+#startButtonContainer h1 {
+    color: #ffcc00; /* タイトルの色 */
+    /* font-sizeをclamp()で指定し、より大きくレスポンシブに */
+    font-size: clamp(36px, 8vw, 80px);
+    margin-top: 15px;
+    margin-bottom: 25px; /* 名前入力欄とのマージンを調整 */
+    text-shadow: 3px 3px #cc9900;
+    font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+    white-space: nowrap;
+    max-width: 100%;
+    flex-shrink: 0;
+    width: auto;
+    line-height: 1.2;
+    margin-left: auto;
+    margin-right: auto;
+    animation: retro-blink 1.6s steps(1, end) infinite;
+}
+
+/* 既存の #playerNameSection のスタイルをこちらに差し替え */
+#playerNameSection {
+    /* 名前入力欄と下のボタンとのマージンを調整 */
+    margin-top: 0;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* 既存の #startButton のスタイルをこちらに差し替え */
+#startButton {
+    background-color: #ffcc00;
+    color: #fff;
+    border: 2px solid #cc9900;
+    text-shadow: 3px 3px #996600;
+    box-shadow: 4px 4px 0px 0px rgba(204, 153, 0, 0.7);
+    padding: 12px 25px;
+    font-size: clamp(16px, 3.5vw, 28px); /* 少し大きく */
+    width: clamp(200px, 50vw, 300px); /* 少し大きく */
+    margin-top: 15px; /* 説明ボタンとのマージン */
+}
+
+/* 既存の #explainButton, #rankingButton のスタイルをこちらに差し替え */
+#explainButton, #rankingButton {
+    background-color: #009900;
+    color: #fff;
+    border: 2px solid #006600;
+    text-shadow: 2px 2px #006600;
+    width: clamp(180px, 45vw, 280px); /* 少し大きく */
+    height: clamp(40px, 8vw, 55px);
+    padding: 8px 15px;
+    font-size: clamp(14px, 3vw, 22px); /* 少し大きく */
+    margin-top: 10px;
+}
+
+/* ランキングボタンから不要なマージン指定を削除 */
+#rankingButton {
+    margin-top: 10px;
+}
         /* --- ここまで追加したCSS --- */
 
     </style>
@@ -663,28 +728,30 @@
     <button id="exitButton" style="display: none;">EXIT</button>
 
     <div id="startButtonContainer">
-        <h1 id="mainTitle">ハマチ カンパチ シュート</h1>
-        <button id="explainButton">
-            ゲーム説明
-        </button>
-        <button id="startButton">
-            ゲームスタート
-        </button>
+      <h1 id="mainTitle">ハマチ カンパチ シュート</h1>
 
-        <div id="playerNameSection">
-            <input type="text" id="playerNameInput" placeholder="名前を入力">
-            <div id="playerNameErrorMessage"></div>
-        </div>
+      <div id="playerNameSection">
+          <input type="text" id="playerNameInput" placeholder="名前を入力">
+          <div id="playerNameErrorMessage"></div>
+      </div>
 
-        <button id="rankingButton" style="margin-top: 10px;">
-            ランキング
-        </button>
+      <button id="explainButton">
+          ゲーム説明
+      </button>
 
-        <div id="rankingsContainer">
-            <h3>あなたの最高得点</h3>
-            <span id="personalHighScore">まだスコアがありません</span>
-        </div>
-    </div>
+      <button id="startButton">
+          ゲームスタート
+      </button>
+
+      <button id="rankingButton">
+          ランキング
+      </button>
+
+      <div id="rankingsContainer">
+          <h3>あなたの最高得点</h3>
+          <span id="personalHighScore">まだスコアがありません</span>
+      </div>
+  </div>
 
     <div id="explanationOverlay">
         <div id="explanationContent">
@@ -1098,7 +1165,6 @@
             gameState.player.x = gameState.playerTargetPositions[gameState.currentPlayerTargetIndex] - gameState.player.width / 2;
 
             document.getElementById('gameOver').style.display = 'none';
-            exitButton.style.display = 'block'; // ゲーム開始時にEXITボタンを表示
             updateUI();
         }
 
@@ -1267,6 +1333,7 @@
                 document.getElementById('gameOver').style.display = 'none';
                 document.getElementById('ui').style.display = 'none';
                 gameContainer.style.display = 'none';
+                exitButton.style.display = 'block'; // ★ここに移動！ゲーム開始時にEXITボタンを表示
                 document.getElementById('mobileControls').style.display = 'none';
                 exitButton.style.display = 'none'; // リトライでスタート画面に戻るのでEXITボタンを非表示に
                 loadHighScore(); // スタート画面に戻る際に最高得点を再表示
