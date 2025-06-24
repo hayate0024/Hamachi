@@ -665,6 +665,1813 @@
 /* --- スマホ表示でタイトル位置を調整するCSS --- */
 @media (max-width: 600px) {
     #startButtonContainer h1#mainTitle {
+        margin-top: 5vh; /* 画面の高さの5%分、上にマージンを追加 */
+    }
+}
+        /* --- ここまで追加したCSS --- */
+
+    </style>
+</head>
+<body>
+    <div id="ui" style="display: none;">
+        <div>スコア: <span id="score">0</span></div>
+        <div>ライフ: <span id="lives">3</span></div>
+        <div>レベル: <span id="level">1</span></div>
+    </div>
+    <div id="gameContainer" style="display: none;">
+        <canvas id="gameCanvas" width="800" height="800"></canvas>
+        <div id="gameOver">
+            <div>ゲームオーバー</div>
+            <div>最終スコア: <span id="finalScore">0</span></div>
+            <div id="yourRank"></div>
+            <button id="restartButton">リトライ</button>
+        </div>
+        <div id="instructions">
+            矢印キー: 移動 | スペース: ハマチショット | エンター: カンパチショット | R: リスタート | D: デバッグラインON
+        </div>
+
+        <div id="mobileControls" style="display: none;">
+            <button id="leftButton" class="control-button">←</button>
+            <button id="shootHamachiButton" class="control-button shoot shoot-hamachi">ハマチ！</button>
+            <button id="shootKanpachiButton" class="control-button shoot shoot-kanpachi">カンパチ！</button>
+            <button id="rightButton" class="control-button">→</button>
+        </div>
+    </div>
+    <button id="exitButton" style="display: none;">EXIT</button>
+
+    <div id="startButtonContainer">
+      <h1 id="mainTitle">ハマチ カンパチ シュート</h1>
+
+      <div id="playerNameSection">
+          <input type="text" id="playerNameInput" placeholder="名前を入力">
+          <div id="playerNameErrorMessage"></div>
+      </div>
+
+      <button id="explainButton">
+          ゲーム説明
+      </button>
+
+      <button id="startButton">
+          ゲームスタート
+      </button>
+
+      <button id="rankingButton">
+          ランキング
+      </button>
+
+      <div id="rankingsContainer">
+          <h3>あなたの最高得点</h3>
+          <span id="personalHighScore">まだスコアがありません</span>
+      </div>
+  </div>
+
+    <div id="explanationOverlay">
+        <div id="explanationContent">
+            <h2 id="explanationTitle">ゲーム説明</h2>
+            <p>
+                「ハマチ カンパチ シュート」へようこそ！<br>
+                このゲームは、ハマチとカンパチを正しく理解するためのシューティングゲームです。ザ・グレイトピープルズのハマチカンパチを聴く上での助けとなるでしょう。
+                正しいショットで、出世魚たちの成長の旅を助け、高スコアを目指しましょう。
+            </p>
+            <h3>基本的なルール</h3>
+            <ul>
+                <li>プレイヤーは左右に移動できます。</li>
+                <li>「ハマチ！」ボタンで「ハマチショット」（青い弾）を発射。</li>
+                <li>「カンパチ！」ボタンで「カンパチショット」（ピンクの弾）を発射。</li>
+                <li>このゲームに迷い込んだブロック（魚）が水面から降下してきます。魚には種類があるので、「適切なショット」を撃ちましょう。魚の名称からハマチなのかカンパチなのかを判断してください。弾が当たると魚は消え元いた世界に戻ります。</li>
+                <li>誤ったショットで魚を撃つと、魚が怒ってさらに降下してきます。</li>
+                <li>魚の攻撃でライフが減ります。ライフがなくなったり魚が降下しきるとゲームオーバーです。</li>
+                <li>すべての魚を撃つとレベルアップ！新たな出世魚たちが現れます。</li>
+            </ul>
+
+            <h3>出世魚（しゅっせうお）について</h3>
+            <p>
+                「出世魚」とは、成長するにつれて呼び名が変わる魚のことです。地方によっても様々な呼び名があり、その多様性が日本の豊かな食文化をJECTしています。
+            </p>
+            <h4>ブリ系（ハマチ系）の主な呼び名</h4>
+            <p>ブリは、稚魚から成魚になるまでに何度も名前を変える、まさに「出世魚」の代表格です。以下に、その成長段階と地域ごとの呼び名を紹介します。</p>
+            <ul>
+                <li>一般的な呼び名（大きさによる目安）
+                    <ul>
+                        <li>モジャコ: 稚魚（稚魚全般を指すこともあります）</li>
+                        <li>ワカシ/ツバス/ショゴなど: 35cm以下の幼魚。小さい段階。</li>
+                        <li>イナダ/ハマチ/フクラギなど: 35～60cm程度の若魚。</li>
+                        <li>ワラサ/メジロ/ガンドなど: 60～80cm程度の中型魚。</li>
+                        <li>ブリ: 80cm以上の成魚。</li>
+                    </ul>
+                </li>
+                <li>地域ごとの呼び名
+                    <ul>
+                        <li>関東地方:
+                            <ul>
+                                <li>ワカシ (35cm以下)</li>
+                                <li>イナダ (35～60cm)</li>
+                                <li>ワラサ (60～80cm)</li>
+                                <li>ブリ (80cm以上)</li>
+                            </ul>
+                        </li>
+                        <li>関西地方:
+                            <ul>
+                                <li>ツバス (35cm以下)</li>
+                                <li>ハマチ (35～60cm)</li>
+                                <li>メジロ (60～80cm)</li>
+                                <li>ブリ (80cm以上)</li>
+                            </ul>
+                        </li>
+                        <li>北陸地方:
+                            <ul>
+                                <li>コゾクラ (35cm以下)</li>
+                                <li>フクラギ (35～60cm)</li>
+                                <li>ガンド (60～80cm)</li>
+                                <li>ブリ (80cm以上)</li>
+                            </ul>
+                        </li>
+                        <li>九州地方:
+                            <ul>
+                                <li>ヤズ (35cm以下)</li>
+                                <li>ワカナ (35～60cm)</li>
+                                <li>ハマチ (60～80cm)</li>
+                                <li>ブリ (80cm以上)</li>
+                            </ul>
+                        </li>
+                        <li>その他の地域・呼び名:
+                            <ul>
+                                <li>東海地方: アブコ（幼魚）</li>
+                                <li>東北地方: ショゴ（幼魚）、オオイナダ（大型）</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <h4>カンパチ系の主な呼び名</h4>
+            <p>カンパチもまた、地方ごとに異なるユニークな呼び名を持つ出世魚です。以下に、その成長段階と地域ごとの呼び名を紹介します。</p>
+            <ul>
+                <li>一般的な呼び名（大きさによる目安）
+                    <ul>
+                        <li>ショッコ/シオッコ: 10～20cm程度の幼魚。非常に小さい段階。</li>
+                        <li>シオ: 20～30cm程度の若魚。</li>
+                        <li>アカバナ/アカバネ: 30～40cm程度の魚。体色が少し赤みを帯びることに由来。
+                        <li>カンパチ: 50cm以上の成魚。</li>
+                    </ul>
+                </li>
+                <li>地域ごとの呼び名
+                    <ul>
+                        <li>関東地方:
+                            <ul>
+                                <li>ショッコ/シオッコ (35cm以下)</li>
+                                <li>シオゴ (60cmまで)</li>
+                                <li>アカハナ (80cmまで)</li>
+                                <li>カンパチ (80cm以上)</li>
+                                <li>その他、稚魚を「モジャコ」と呼ぶこともあります。</li>
+                            </ul>
+                        </li>
+                        <li>関西地方:
+                            <ul>
+                                <li>シオ (60cmまで)</li>
+                                <li>カンパチ (60cm以上)</li>
+                                <li>若魚を「ハマチ」と呼ぶこともありますが、これはブリの成長途上の呼び方と混同されがちです。</li>
+                            </ul>
+                        </li>
+                        <li>九州地方:
+                            <ul>
+                                <li>カンコ/ショッコ (幼魚)</li>
+                                <li>アカバナ (若魚の一部)</li>
+                                <li>カンパチ (成魚)</li>
+                                <li>宮崎では「ニリ」、鹿児島では「ニノコ」、鹿児島県では「ネイゴ」や「アカバラ」という呼び名もあります。</li>
+                                <li>幼魚を「ヒラゴ」、成魚を「ヒラス」（ヒラマサと混同されやすい）と呼ぶこともあります。</li>
+                            </ul>
+                        </li>
+                        <li>沖縄地方:
+                            <ul>
+                                <li>シオマー (幼魚)</li>
+                                <li>カンパチ (成魚)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <p>
+                このゲームでは、出世魚の呼び名がブロックとして登場します。
+                正しいショットで、高スコアを目指しましょう！
+            </p>
+            <button class="close-button" id="closeExplanationButton">閉じる</button>
+        </div>
+    </div>
+
+    <div id="spreadsheetOverlay" class="overlay">
+    <div class="overlay-content">
+        <div class="iframe-wrapper">
+            <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRa0Q9xStdlDqAY18a_bpeyoGskywpikXjWiLNS9LKW_Km9Mg2uATO-vpVZhA_62JUde483QB4FSNUg/pubhtml?gid=493938141&amp;single=true&amp;widget=false&amp;headers=false&amp;gridlines=false&amp;range=A1:E6&amp;chrome=false"></iframe>
+        </div>
+        <button id="closeSpreadsheetButton" class="close-button">閉じる</button>
+    </div>
+</div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gameContainer = document.getElementById('gameContainer');
+
+        const startButtonContainer = document.getElementById('startButtonContainer');
+        const startButton = document.getElementById('startButton');
+        const explainButton = document.getElementById('explainButton'); // 説明ボタン
+        const rankingButton = document.getElementById('rankingButton'); // ランキングボタンを追加
+        const explanationOverlay = document.getElementById('explanationOverlay'); // 説明画面
+        const closeExplanationButton = document.getElementById('closeExplanationButton'); // 説明画面を閉じるボタン
+        const rankingsContainer = document.getElementById('rankingsContainer'); // ランキングコンテナ（親要素）
+        const personalHighScoreDisplay = document.getElementById('personalHighScore'); // 個人の最高得点表示用
+        const playerNameInput = document.getElementById('playerNameInput'); // プレイヤー名入力フィールド
+        const playerNameErrorMessage = document.getElementById('playerNameErrorMessage'); // 名前入力エラーメッセージ
+        const yourRankDisplay = document.getElementById('yourRank'); // ゲームオーバー画面の順位表示
+        const exitButton = document.getElementById('exitButton'); // EXITボタンの取得
+
+        // --- ここから追加 ---
+        // スプレッドシートオーバーレイ関連の要素を取得
+        const spreadsheetOverlay = document.getElementById('spreadsheetOverlay');
+        const closeSpreadsheetButton = document.getElementById('closeSpreadsheetButton');
+        // --- ここまで追加 ---
+
+        // タイトルと説明タイトルの要素を取得
+        const mainTitle = document.getElementById('mainTitle');
+        const explanationTitle = document.getElementById('explanationTitle');
+
+        // GoogleフォームのURLとエントリーIDを定義
+        const GOOGLE_FORM_URL = 'https://docs.google.com/forms/u/0/d/e/1FAIpQLSc_Nch5Rt2IvGJb3h6-V4JeTkeJ76Xy0OhcES7zB2-0fwwdtg/formResponse';
+        const FORM_PLAYER_NAME_ENTRY_ID = 'entry.1723250269'; // プレイヤー名のフォームエントリーID
+        const FORM_SCORE_ENTRY_ID = 'entry.2114519163';     // スコアのフォームエントリーID
+
+        const ORIGINAL_CANVAS_WIDTH = 800;
+        const ORIGINAL_CANVAS_HEIGHT = 800;
+
+        // ハマチ系の呼び名をカンパチと同じ形式に統一
+        const HAMACHI_WORDS = [
+            'モジャコ', // 稚魚
+            'ワカシ', 'ツバス', 'コゾクラ', 'ヤズ', 'アブコ', 'ショゴ', // 小型
+            'イナダ', 'ハマチ', 'フクラギ', 'ガンド', 'ワカナ', // 中型
+            'ワラサ', 'メジロ', 'オオイナダ', // 大型
+            'ブリ' // 成魚
+        ];
+        const KANPACHI_WORDS = [
+            'ショッコ', 'シオッコ', 'シオ', 'アカバナ', 'アカバネ', 'カンパチ', // 一般的な呼び名
+            'シオゴ', // 関東
+            'カンコ', 'ニリ', 'ニノコ', 'ネイゴ', 'アカバラ', 'ヒラゴ', 'ヒラス', // 九州
+            'シオマー', // 沖縄
+            'ヒヨ', 'チギリキ', 'アカイオ' // その他
+        ];
+        const ALL_WORDS = [...HAMACHI_WORDS, ...KANPACHI_WORDS];
+
+        const ENEMY_BASE_WIDTH = 120;
+        const ENEMY_BASE_HEIGHT = 40;
+        const ENEMY_COL_SPACING = 140;
+        const ENEMY_ROW_SPACING = 60;
+        const ENEMY_COLS = 5;
+        const ENEMY_ROWS = 3;
+        const ENEMY_START_Y_OFFSET = 110;
+
+        const PLAYER_BASE_WIDTH = 40;
+        const PLAYER_BASE_HEIGHT = 30;
+        const PLAYER_Y_OFFSET_FROM_BOTTOM_BASE = 180;
+        const BULLET_PLAYER_BASE_WIDTH = 4;
+        const BULLET_PLAYER_BASE_HEIGHT = 10;
+        const BULLET_PLAYER_BASE_SPEED = 7;
+        const BULLET_ENEMY_BASE_WIDTH = 8;
+        const BULLET_ENEMY_BASE_HEIGHT = 16;
+        const BULLET_ENEMY_BASE_SPEED = 1.5;
+
+        const SHOOT_COOLDOWN = 200;
+        const PLAYER_GRID_MOVE_AMOUNT = 1;
+
+        const ENEMY_DROP_AMOUNT_COLLISION = 20;
+        const ENEMY_AUTO_DROP_INTERVAL = 5000;
+        const ENEMY_AUTO_DROP_FACTOR = 0.25;
+
+        let frameCount = 0;
+
+        const ENEMY_SHOOT_CHANCE_BASE = 0.01;
+        const ENEMY_SHOOT_CHANCE_LEVEL_FACTOR = 0.5;
+
+        let UNIFIED_ENEMY_FONT_SIZE = 0;
+
+        let showDebugLines = true;
+
+        let gameState = {
+            player: {},
+            bullets: [],
+            enemies: [],
+            enemyBullets: [],
+            score: 0,
+            lives: 3,
+            level: 1,
+            playerName: '', // プレイヤー名を空文字列で初期化
+            gameOver: false,
+            keys: {},
+            lastShootTime: 0,
+            lastEnemyAutoDropTime: 0,
+            playerTargetPositions: [],
+            currentPlayerTargetIndex: 0,
+            personalHighScore: 0
+        };
+
+        const WATER_SURFACE_Y_OFFSET_FROM_ENEMY_TOP = -50;
+        const WAVE_AMPLITUDE_BASE = 6;
+        const WAVE_FREQUENCY_BASE = 0.2;
+        const WATER_COLOR_TOP = '#66ccff';
+        const WATER_COLOR_BOTTOM = '#0000aa';
+        const WATER_LINE_COLOR = '#aaffee';
+        const WATER_LINE_SHADOW_COLOR = '#6688aa';
+
+        const PLAYER_COLOR = '#009900';
+        const PLAYER_SHADOW_COLOR = '#006600';
+
+        const PLAYER_BULLET_COLOR_HAMACHI = '#99ddff';
+        const PLAYER_BULLET_COLOR_KANPACHI = '#ff99cc';
+
+        const ENEMY_BULLET_COLOR = '#ff6666';
+        const ENEMY_BULLET_SHADOW_COLOR = '#993333';
+
+        let audioContext;
+
+        function getScaleFactor() {
+            if (canvas.width === 0) {
+                return 1;
+            }
+            return canvas.width / ORIGINAL_CANVAS_WIDTH;
+        }
+
+        function scale(value) {
+            return value * getScaleFactor();
+        }
+
+        function resizeGameContainer() {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            // UIの高さを考慮する
+            const uiElement = document.getElementById('ui');
+            const uiHeight = uiElement && uiElement.style.display !== 'none' ? uiElement.offsetHeight : 0;
+            // offsetを少し減らして、より多くのスペースを利用できるように調整
+            const offset = 20;
+
+            const size = Math.min(vw - offset, vh - uiHeight - offset);
+
+            gameContainer.style.width = `${size}px`;
+            gameContainer.style.height = `${size}px`;
+            startButtonContainer.style.width = `${size}px`; // スタート画面も同じサイズに
+            startButtonContainer.style.height = `${size}px`; // スタート画面も同じサイズに
+
+
+            canvas.width = size;
+            canvas.height = size;
+        }
+
+        /**
+         * 指定されたテキスト要素のフォントサイズを動的に調整し、親要素の幅に収める関数。
+         * バイナリサーチ（二分探索）を使用して効率的に最適なフォントサイズを見つけます。
+         * @param {HTMLElement} element - フォントサイズを調整するテキスト要素。
+         * @param {number} maxFontSize - 設定できる最大のフォントサイズ。
+         * @param {number} minFontSize - 設定できる最小のフォントサイズ。
+         * @param {number} paddingFactor - 親要素の幅に対してどれだけの余裕を持たせるか (例: 0.98 で 98% に収める)。
+         */
+        function adjustTextFontSizeSmart(element, maxFontSize, minFontSize = 5, paddingFactor = 0.98) {
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.imageSmoothingEnabled = false;
+            tempCtx.webkitImageSmoothingEnabled = false;
+            tempCtx.mozImageSmoothingEnabled = false;
+
+            const parentWidth = element.parentElement.clientWidth;
+            const textContent = element.textContent;
+
+            // 親要素のパディングを考慮した利用可能な幅
+            const computedStyle = getComputedStyle(element.parentElement);
+            const availableWidth = parentWidth - (parseFloat(computedStyle.paddingLeft) || 0) - (parseFloat(computedStyle.paddingRight) || 0);
+
+            let low = minFontSize;
+            let high = maxFontSize;
+            let optimalFontSize = minFontSize;
+
+            while (low <= high) {
+                let mid = Math.floor((low + high) / 2);
+                tempCtx.font = `${mid}px 'DotGothic16', 'Press Start 2P', cursive, monospace`;
+                const textWidth = tempCtx.measureText(textContent).width;
+
+                if (textWidth <= availableWidth * paddingFactor) {
+                    optimalFontSize = mid; // 現在のフォントサイズは収まるので、これを暫定の最適解とし、より大きなサイズを試す
+                    low = mid + 1;
+                } else {
+                    high = mid - 1; // 収まらないので、より小さなサイズを試す
+                }
+            }
+            element.style.fontSize = `${optimalFontSize}px`;
+        }
+
+
+        // ResizeObserverを導入
+        let mainTitleObserver;
+        let explanationTitleObserver;
+
+        function setupResizeObservers() {
+            if (mainTitleObserver) mainTitleObserver.disconnect();
+            if (explanationTitleObserver) explanationTitleObserver.disconnect();
+
+            mainTitleObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    if (entry.target === mainTitle) {
+                        adjustTextFontSizeSmart(mainTitle, 60, 10, 0.98); // 最小10px、余裕0.98
+                    }
+                }
+            });
+            explanationTitleObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    if (entry.target === explanationTitle) {
+                        adjustTextFontSizeSmart(explanationTitle, 32, 10, 0.98); // 最小10px、余裕0.98
+                    }
+                }
+            });
+
+            mainTitleObserver.observe(mainTitle.parentElement); // タイトルの親要素を監視
+            explanationTitleObserver.observe(explanationTitle.parentElement); // 説明タイトルの親要素を監視
+        }
+
+        window.addEventListener('resize', () => {
+            // ゲーム画面またはスタート画面が表示されている場合のみリサイズ処理を実行
+            if (gameContainer.style.display !== 'none' || startButtonContainer.style.display !== 'none') {
+                init();
+            } else {
+                resizeGameContainer(); // それ以外の場合は、単にコンテナサイズを調整
+            }
+            // ResizeObserverがあるので、手動でのadjustTextFontSize呼び出しは不要
+            // adjustTextFontSizeSmartはResizeObserverが検知して自動で呼び出す
+        });
+
+        function init() {
+            resizeGameContainer();
+
+            ctx.imageSmoothingEnabled = false;
+            ctx.webkitImageSmoothingEnabled = false;
+            ctx.mozImageSmoothingEnabled = false;
+
+            gameState.player = {
+                width: scale(PLAYER_BASE_WIDTH),
+                height: scale(PLAYER_BASE_HEIGHT),
+                y: canvas.height - scale(PLAYER_Y_OFFSET_FROM_BOTTOM_BASE),
+                x: 0
+            };
+
+            calculateUnifiedEnemyFontSize();
+
+            createEnemies();
+
+            gameState.bullets = [];
+            gameState.enemyBullets = [];
+            gameState.score = 0;
+            gameState.lives = 3;
+            gameState.level = 1;
+            // gameState.playerName = '名無し'; // ここを削除またはコメントアウト
+            gameState.gameOver = false;
+            gameState.keys = {};
+            gameState.lastShootTime = 0;
+            gameState.lastEnemyAutoDropTime = performance.now();
+            frameCount = 0;
+
+            const middleIndex = Math.floor(gameState.playerTargetPositions.length / 2);
+            gameState.currentPlayerTargetIndex = middleIndex;
+            gameState.player.x = gameState.playerTargetPositions[gameState.currentPlayerTargetIndex] - gameState.player.width / 2;
+
+            document.getElementById('gameOver').style.display = 'none';
+            updateUI();
+        }
+
+        function calculateUnifiedEnemyFontSize() {
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+
+            tempCtx.imageSmoothingEnabled = false;
+            tempCtx.webkitImageSmoothingEnabled = false;
+            tempCtx.mozImageSmoothingEnabled = false;
+
+            const maxTextWidth = scale(ENEMY_BASE_WIDTH) * 0.9;
+
+            let longestWord = '';
+            for (const word of ALL_WORDS) {
+                // 漢字を含む長い単語（例：フクラギ、アカバネなど）も考慮して、最も幅を取りそうな単語を選ぶ
+                if (tempCtx.measureText(word).width > tempCtx.measureText(longestWord).width) {
+                    longestWord = word;
+                }
+            }
+            if (longestWord === '') { // 念のため、配列が空の場合の対処
+                longestWord = 'テスト';
+            }
+
+
+            let testFontSize = scale(50); // 開始フォントサイズを調整
+            const minAllowedEnemyFontSize = 8; // 敵の文字の最小フォントサイズ
+
+            while (testFontSize >= minAllowedEnemyFontSize) {
+                tempCtx.font = `bold ${testFontSize}px 'DotGothic16', 'Press Start 2P'`;
+                const metrics = tempCtx.measureText(longestWord);
+                if (metrics.width <= maxTextWidth) {
+                    break;
+                }
+                testFontSize -= 1;
+            }
+            UNIFIED_ENEMY_FONT_SIZE = Math.max(testFontSize, minAllowedEnemyFontSize); // 最終的に最小値を下回らないように
+        }
+
+        function createEnemies() {
+            gameState.enemies = [];
+            const enemyWidth = scale(ENEMY_BASE_WIDTH);
+            const enemyHeight = scale(ENEMY_BASE_HEIGHT);
+
+            const colSpacing = scale(ENEMY_COL_SPACING);
+            const rowSpacing = scale(ENEMY_ROW_SPACING);
+
+            const totalEnemyGridWidth = (ENEMY_COLS - 1) * colSpacing + enemyWidth;
+
+            const firstEnemyX = (canvas.width - totalEnemyGridWidth) / 2;
+
+            const startY = scale(ENEMY_START_Y_OFFSET);
+
+            const uniquePlayerTargetPositions = new Set();
+
+            for (let row = 0; row < ENEMY_ROWS; row++) {
+                for (let col = 0; col < ENEMY_COLS; col++) {
+                    const enemyType = row < 1 ? 'small' : 'large';
+
+                    const enemyText = ALL_WORDS[Math.floor(Math.random() * ALL_WORDS.length)];
+                    // const enemyColor = HAMACHI_WORDS.includes(enemyText) ? 'blue' : 'pink'; // 色の指定を削除
+
+                    const enemyX = firstEnemyX + col * colSpacing;
+                    const enemyY = startY + row * rowSpacing;
+
+                    const enemyCenterX = enemyX + enemyWidth / 2;
+
+                    gameState.enemies.push({
+                        x: enemyX,
+                        y: enemyY,
+                        width: enemyWidth,
+                        height: enemyHeight,
+                        alive: true,
+                        type: enemyType,
+                        // color: enemyColor, // 色の指定を削除
+                        text: enemyText,
+                        centerX: enemyCenterX
+                    });
+
+                    uniquePlayerTargetPositions.add(parseFloat(enemyCenterX.toFixed(2)));
+                }
+            }
+
+            gameState.playerTargetPositions = Array.from(uniquePlayerTargetPositions).sort((a, b) => a - b);
+
+            const playerHalfWidth = gameState.player.width / 2;
+            const minAllowedPlayerCenterX = playerHalfWidth;
+            const maxAllowedPlayerCenterX = canvas.width - playerHalfWidth;
+
+            gameState.playerTargetPositions = gameState.playerTargetPositions.filter(pos =>
+                pos >= minAllowedPlayerCenterX && pos <= maxAllowedPlayerCenterX
+            );
+        }
+
+        document.addEventListener('keydown', (e) => {
+            // 説明画面が表示されている場合は、キー入力を無効化
+            if (explanationOverlay.style.display === 'flex' || spreadsheetOverlay.style.display === 'flex') return;
+
+            if (gameState.gameOver) return;
+
+            gameState.keys[e.key] = true;
+
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                movePlayer(-1);
+            }
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                movePlayer(1);
+            }
+            if (e.key === ' ') {
+                e.preventDefault();
+                shoot('hamachi');
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                shoot('kanpachi');
+            }
+            if (e.key === 'd' || e.key === 'D') {
+                showDebugLines = !showDebugLines;
+                if (showDebugLines) {
+                    document.getElementById('instructions').textContent = '矢印キー: 移動 | スペース: ハマチショット | エンター: カンパチショット | R: リスタート | D: デバッグラインON';
+                } else {
+                    document.getElementById('instructions').textContent = '矢印キー: 移動 | スペース: ハマチショット | エンター: カンパチショット | R: リスタート | D: デバッグラインOFF';
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            // 説明画面が表示されている場合は、キー入力を無効化
+            if (explanationOverlay.style.display === 'flex' || spreadsheetOverlay.style.display === 'flex') return;
+
+            gameState.keys[e.key] = false;
+        });
+
+        const leftButton = document.getElementById('leftButton');
+        const rightButton = document.getElementById('rightButton');
+        const shootHamachiButton = document.getElementById('shootHamachiButton');
+        const shootKanpachiButton = document.getElementById('shootKanpachiButton');
+        const restartButton = document.getElementById('restartButton');
+
+        leftButton.addEventListener('touchstart', (e) => {
+            if (gameState.gameOver) return;
+            e.preventDefault();
+            movePlayer(-1);
+        }, { passive: false });
+        leftButton.addEventListener('touchend', (e) => {
+            e.preventDefault();
+        });
+
+        rightButton.addEventListener('touchstart', (e) => {
+            if (gameState.gameOver) return;
+            e.preventDefault();
+            movePlayer(1);
+        }, { passive: false });
+        rightButton.addEventListener('touchend', (e) => {
+            e.preventDefault();
+        });
+
+        shootHamachiButton.addEventListener('touchstart', (e) => { if (gameState.gameOver) return; e.preventDefault(); shoot('hamachi'); }, { passive: false });
+        shootKanpachiButton.addEventListener('touchstart', (e) => { if (gameState.gameOver) return; e.preventDefault(); shoot('kanpachi'); }, { passive: false });
+
+        restartButton.addEventListener('click', () => {
+            if (gameState.gameOver) {
+                startButtonContainer.style.display = 'flex';
+                document.getElementById('gameOver').style.display = 'none';
+                document.getElementById('ui').style.display = 'none';
+                gameContainer.style.display = 'none';
+                exitButton.style.display = 'block'; // ★ここに移動！ゲーム開始時にEXITボタンを表示
+                document.getElementById('mobileControls').style.display = 'none';
+                exitButton.style.display = 'none'; // リトライでスタート画面に戻るのでEXITボタンを非表示に
+                loadHighScore(); // スタート画面に戻る際に最高得点を再表示
+            }
+        });
+
+        // EXITボタンのイベントリスナー
+        exitButton.addEventListener('click', () => {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId); // ゲームループを停止
+            }
+            // ゲーム状態をリセット（必要に応じて）
+            gameState.gameOver = true; // ゲームオーバー状態にして、次回スタート時にリセットされるようにする
+            startButtonContainer.style.display = 'flex'; // スタート画面を表示
+            document.getElementById('ui').style.display = 'none'; // UIを非表示
+            gameContainer.style.display = 'none'; // ゲームコンテナを非表示
+            document.getElementById('mobileControls').style.display = 'none'; // モバイルコントロールを非表示
+            exitButton.style.display = 'none'; // EXITボタンを非表示
+            document.getElementById('gameOver').style.display = 'none'; // ゲームオーバー画面も非表示
+            loadHighScore(); // ランキングを再表示
+            if (mainTitle) {
+                mainTitle.style.animationPlayState = 'running'; // タイトル点滅を再開
+            }
+        });
+
+
+        function movePlayer(direction) {
+            const newIndex = gameState.currentPlayerTargetIndex + direction * PLAYER_GRID_MOVE_AMOUNT;
+
+            if (newIndex >= 0 && newIndex < gameState.playerTargetPositions.length) {
+                gameState.currentPlayerTargetIndex = newIndex;
+                gameState.player.x = gameState.playerTargetPositions[gameState.currentPlayerTargetIndex] - gameState.player.width / 2;
+            }
+            gameState.player.x = Math.max(0, Math.min(canvas.width - gameState.player.width, gameState.player.x));
+        }
+
+        function shoot(type) {
+            if (gameState.gameOver || performance.now() - gameState.lastShootTime < SHOOT_COOLDOWN) {
+                return;
+            }
+
+            const bulletColor = (type === 'hamachi') ? PLAYER_BULLET_COLOR_HAMACHI : PLAYER_BULLET_COLOR_KANPACHI;
+
+            gameState.bullets.push({
+                x: gameState.player.x + gameState.player.width / 2 - scale(BULLET_PLAYER_BASE_WIDTH) / 2,
+                y: gameState.player.y,
+                width: scale(BULLET_PLAYER_BASE_WIDTH),
+                height: scale(BULLET_PLAYER_BASE_HEIGHT),
+                speed: scale(BULLET_PLAYER_BASE_SPEED),
+                color: bulletColor,
+                type: type
+            });
+            gameState.lastShootTime = performance.now();
+        }
+
+        function updateBullets() {
+            gameState.bullets = gameState.bullets.filter(bullet => {
+                bullet.y -= bullet.speed;
+                return bullet.y > 0;
+            });
+
+            gameState.enemyBullets = gameState.enemyBullets.filter(bullet => {
+                bullet.y += bullet.speed;
+                return bullet.y < canvas.height;
+            });
+        }
+
+        function updateEnemies() {
+            if (Math.random() < ENEMY_SHOOT_CHANCE_BASE * (gameState.level * ENEMY_SHOOT_CHANCE_LEVEL_FACTOR)) {
+                const aliveEnemies = gameState.enemies.filter(e => e.alive && e.y < canvas.height - scale(100));
+                if (aliveEnemies.length > 0) {
+                    const enemy = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+                    gameState.enemyBullets.push({
+                        x: enemy.x + enemy.width / 2 - scale(BULLET_ENEMY_BASE_WIDTH) / 2,
+                        y: enemy.y + enemy.height,
+                        width: scale(BULLET_ENEMY_BASE_WIDTH),
+                        height: scale(BULLET_ENEMY_BASE_HEIGHT),
+                        speed: scale(BULLET_ENEMY_BASE_SPEED)
+                    });
+                }
+            }
+
+            const currentTime = performance.now();
+            if (currentTime - gameState.lastEnemyAutoDropTime > ENEMY_AUTO_DROP_INTERVAL) {
+                const dropAmount = scale(ENEMY_BASE_HEIGHT * ENEMY_AUTO_DROP_FACTOR);
+                dropAllEnemies(dropAmount);
+                gameState.lastEnemyAutoDropTime = currentTime;
+            }
+        }
+
+        function dropAllEnemies(dropAmount) {
+            for (const enemy of gameState.enemies) {
+                if (enemy.alive) {
+                    enemy.y += dropAmount;
+                    if (enemy.y + enemy.height >= gameState.player.y) {
+                        setGameOver();
+                        break;
+                    }
+                }
+            }
+        }
+
+        function playBeep(frequency, waveType = 'sine', duration = 0.1, volume = 0.5) {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn("Web Audio API is not supported or could not be initialized:", e);
+                    return;
+                }
+            }
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.type = waveType;
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+
+        function checkCollisions() {
+            const dropAmountCollision = scale(ENEMY_DROP_AMOUNT_COLLISION);
+
+            for (let i = gameState.bullets.length - 1; i >= 0; i--) {
+                const bullet = gameState.bullets[i];
+                for (let j = gameState.enemies.length - 1; j >= 0; j--) {
+                    const enemy = gameState.enemies[j];
+                    if (!enemy.alive) continue;
+
+                    if (isColliding(bullet, enemy)) {
+                        const isMatch = (bullet.type === 'hamachi' && HAMACHI_WORDS.includes(enemy.text)) ||
+                                        (bullet.type === 'kanpachi' && KANPACHI_WORDS.includes(enemy.text));
+
+                        if (isMatch) {
+                            enemy.alive = false;
+                            gameState.score += enemy.type === 'small' ? 20 : 10;
+                            if (bullet.type === 'hamachi') {
+                                playBeep(600, 'square', 0.1, 0.7);
+                            } else {
+                                playBeep(400, 'square', 0.1, 0.7);
+                            }
+                        } else {
+                            playBeep(200, 'sawtooth', 0.15, 0.5);
+                            dropAllEnemies(dropAmountCollision);
+                        }
+                        gameState.bullets.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+
+            for (let i = gameState.enemyBullets.length - 1; i >= 0; i--) {
+                const bullet = gameState.enemyBullets[i];
+                if (isColliding(bullet, gameState.player)) {
+                    gameState.enemyBullets.splice(i, 1);
+                    gameState.lives--;
+                    playBeep(150, 'square', 0.2, 0.8);
+                    dropAllEnemies(dropAmountCollision);
+
+                    if (gameState.lives <= 0) {
+                        setGameOver();
+                    }
+                }
+            }
+
+            for (const enemy of gameState.enemies) {
+                if (enemy.alive && isColliding(enemy, gameState.player)) {
+                    playBeep(150, 'square', 0.2, 0.8);
+                    setGameOver();
+                    break;
+                }
+            }
+        }
+
+        function isColliding(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect2.height > rect2.y;
+        }
+
+        function setGameOver() {
+            gameState.gameOver = true;
+            document.getElementById('gameOver').style.display = 'block';
+            document.getElementById('finalScore').textContent = gameState.score;
+            playBeep(100, 'triangle', 0.5, 0.9);
+
+            // スコアを保存
+            saveHighScore(gameState.score);
+
+            // Googleフォームにスコアを送信
+            submitScoreToGoogleForm(gameState.playerName, gameState.score);
+
+            // スコア送信機能を削除したため、自分の順位表示は行わない
+            yourRankDisplay.textContent = "";
+
+
+            exitButton.style.display = 'none'; // ゲームオーバー時にEXITボタンを非表示
+        }
+
+        function checkLevelUp() {
+            const aliveEnemies = gameState.enemies.filter(e => e.alive);
+            if (aliveEnemies.length === 0) {
+                gameState.level++;
+
+                createEnemies();
+                const middleIndex = Math.floor(gameState.playerTargetPositions.length / 2);
+                gameState.currentPlayerTargetIndex = middleIndex;
+                gameState.player.x = gameState.playerTargetPositions[gameState.currentPlayerTargetIndex] - gameState.player.width / 2;
+
+                gameState.lastEnemyAutoDropTime = performance.now();
+            }
+        }
+
+        function draw() {
+            ctx.fillStyle = WATER_COLOR_BOTTOM;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const waterSurfaceY = scale(ENEMY_START_Y_OFFSET) + scale(WATER_SURFACE_Y_OFFSET_FROM_ENEMY_TOP);
+
+            const shadowOffset = scale(1);
+            const lineWidth = scale(2);
+            const waveAmplitude = scale(WAVE_AMPLITUDE_BASE);
+            const waveFrequency = WAVE_FREQUENCY_BASE;
+
+            ctx.beginPath();
+            let currentX = 0;
+            let currentY = waterSurfaceY + Math.round(Math.sin(currentX * waveFrequency) * waveAmplitude);
+
+            ctx.moveTo(0, currentY);
+
+            for (let x = 0; x <= canvas.width; x += scale(4)) {
+                const yOffset = Math.round(Math.sin(x * waveFrequency) * waveAmplitude);
+                currentY = waterSurfaceY + yOffset;
+                ctx.lineTo(x, currentY);
+            }
+
+            ctx.lineTo(canvas.width, 0);
+            ctx.lineTo(0, 0);
+            ctx.closePath();
+            ctx.fillStyle = WATER_COLOR_TOP;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.strokeStyle = WATER_LINE_SHADOW_COLOR;
+            ctx.lineWidth = lineWidth;
+            ctx.moveTo(Math.round(0 + shadowOffset), Math.round(waterSurfaceY + Math.sin(0 * waveFrequency) * waveAmplitude + shadowOffset));
+            for (let x = 0; x <= canvas.width; x += scale(4)) {
+                const yOffset = Math.round(Math.sin(x * waveFrequency) * waveAmplitude);
+                ctx.lineTo(Math.round(x + shadowOffset), Math.round(waterSurfaceY + yOffset + shadowOffset));
+            }
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = WATER_LINE_COLOR;
+            ctx.lineWidth = lineWidth;
+            ctx.moveTo(Math.round(0), Math.round(waterSurfaceY + Math.sin(0 * waveFrequency) * waveAmplitude));
+            for (let x = 0; x <= canvas.width; x += scale(4)) {
+                const yOffset = Math.round(Math.sin(x * waveFrequency) * waveAmplitude);
+                ctx.lineTo(Math.round(x), Math.round(waterSurfaceY + yOffset));
+            }
+            ctx.stroke();
+
+            if (gameState.player && gameState.player.x !== undefined && gameState.player.y !== undefined) {
+                ctx.fillStyle = PLAYER_SHADOW_COLOR;
+                ctx.fillRect(gameState.player.x + scale(2), gameState.player.y + scale(2), gameState.player.width, gameState.player.height);
+                ctx.fillStyle = PLAYER_COLOR;
+                ctx.fillRect(gameState.player.x, gameState.player.y, gameState.player.width, gameState.player.height);
+            }
+
+            for (const bullet of gameState.bullets) {
+                if (frameCount % 2 === 0) {
+                    const bulletShadowColor = (bullet.type === 'hamachi') ? '#003366' : '#660033';
+                    const bulletMainColor = (bullet.type === 'hamachi') ? PLAYER_BULLET_COLOR_HAMACHI : PLAYER_BULLET_COLOR_KANPACHI;
+
+                    ctx.fillStyle = bulletShadowColor;
+                    ctx.fillRect(Math.round(bullet.x + scale(1)), Math.round(bullet.y + scale(1)), bullet.width, bullet.height);
+
+                    ctx.fillStyle = bulletMainColor;
+                    ctx.fillRect(Math.round(bullet.x), Math.round(bullet.y), bullet.width, bullet.height);
+                }
+            }
+
+            for (const bullet of gameState.enemyBullets) {
+                if (frameCount % 3 === 0) {
+                    ctx.fillStyle = ENEMY_BULLET_SHADOW_COLOR;
+                    ctx.fillRect(Math.round(bullet.x + scale(1)), Math.round(bullet.y + scale(1)), bullet.width, bullet.height);
+
+                    ctx.fillStyle = ENEMY_BULLET_COLOR;
+                    ctx.fillRect(Math.round(bullet.x), Math.round(bullet.y), bullet.width, bullet.height);
+                }
+            }
+
+            for (const enemy of gameState.enemies) {
+                if (!enemy.alive) continue;
+
+                // 敵ブロックの色をCSSクラスから取得
+                const tempDiv = document.createElement('div');
+                tempDiv.className = 'enemy-block';
+                document.body.appendChild(tempDiv); // スタイル計算のために一時的にDOMに追加
+                const computedStyle = getComputedStyle(tempDiv);
+
+                const enemyBlockMainColor = computedStyle.backgroundColor;
+                const enemyBlockShadowColor = computedStyle.boxShadow.split(')')[0] + ')'; // box-shadowから色を抽出
+                const textColor = computedStyle.color;
+                const textShadowColor = computedStyle.textShadow.split(')')[0] + ')'; // text-shadowから色を抽出
+
+                document.body.removeChild(tempDiv); // 一時要素を削除
+
+                ctx.fillStyle = enemyBlockShadowColor;
+                ctx.fillRect(enemy.x + scale(2), enemy.y + scale(2), enemy.width, enemy.height);
+
+                ctx.fillStyle = enemyBlockMainColor;
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+
+                /* ここで文字の高さ調整のためのフォント設定 */
+                ctx.font = `bold ${UNIFIED_ENEMY_FONT_SIZE}px 'DotGothic16', 'Press Start 2P'`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle'; /* 文字のベースラインを中央に設定 */
+
+                ctx.fillStyle = textShadowColor;
+                ctx.fillText(enemy.text, enemy.x + enemy.width / 2 + scale(2), enemy.y + enemy.height / 2 - 2 + scale(2));
+
+                ctx.fillStyle = textColor;
+                ctx.fillText(enemy.text, enemy.x + enemy.width / 2, enemy.y + enemy.height / 2 - 2);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('score').textContent = gameState.score;
+            // ライフ表示を数字に変更
+            document.getElementById('lives').textContent = gameState.lives;
+            document.getElementById('level').textContent = gameState.level;
+        }
+
+        let animationFrameId;
+
+        function gameLoop() {
+            if (!gameState.gameOver) {
+                updateBullets();
+                updateEnemies();
+                checkCollisions();
+                checkLevelUp();
+            }
+
+            draw();
+            updateUI();
+            frameCount++;
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // --- ローカルストレージを使った最高得点管理 ---
+
+        function saveHighScore(score) {
+            if (score > gameState.personalHighScore) {
+                gameState.personalHighScore = score;
+                localStorage.setItem('hamachiKanpachiHighScore', gameState.personalHighScore);
+                displayHighScore(); // 保存後に表示を更新
+            }
+        }
+
+        function loadHighScore() {
+            const storedScore = localStorage.getItem('hamachiKanpachiHighScore');
+            gameState.personalHighScore = storedScore ? parseInt(storedScore, 10) : 0;
+            displayHighScore();
+        }
+
+        function displayHighScore() {
+            if (gameState.personalHighScore > 0) {
+                personalHighScoreDisplay.textContent = `${gameState.personalHighScore} 点`;
+            } else {
+                personalHighScoreDisplay.textContent = 'まだスコアがありません';
+            }
+        }
+
+        // --- Googleフォームへのスコア送信関数 ---
+        async function submitScoreToGoogleForm(playerName, score) {
+            const formData = new FormData();
+            formData.append(FORM_PLAYER_NAME_ENTRY_ID, playerName);
+            formData.append(FORM_SCORE_ENTRY_ID, score);
+
+            try {
+                const response = await fetch(GOOGLE_FORM_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // CORSエラーを避けるためにno-corsモードを使用
+                    body: formData
+                });
+                // no-corsモードではresponse.okは常にtrueになるため、成功を直接判断できません。
+                // 実際にはリクエストが送信されたことを確認するのみになります。
+                console.log('スコアがGoogleフォームに送信されました（no-corsモードのため結果は確認できません）。');
+            } catch (error) {
+                console.error('Googleフォームへのスコア送信中にエラーが発生しました:', error);
+            }
+        }
+
+
+        // ページのロードが完了したら、スタート画面を表示
+        document.addEventListener('DOMContentLoaded', () => {
+            resizeGameContainer();
+            startButtonContainer.style.display = 'flex';
+            document.getElementById('ui').style.display = 'none';
+            gameContainer.style.display = 'none';
+            document.getElementById('mobileControls').style.display = 'none';
+            exitButton.style.display = 'none'; // 初期表示では非表示
+            explanationOverlay.style.display = 'none'; // 説明画面も最初は非表示に
+            spreadsheetOverlay.style.display = 'none'; // ランキングオーバーレイも非表示
+            playerNameErrorMessage.style.visibility = 'hidden'; // エラーメッセージの初期状態を非表示に設定
+            loadHighScore(); // 最高得点を読み込んで表示
+
+            // ResizeObserverのセットアップをDOMContentLoaded時に行う
+            setupResizeObservers();
+            if (mainTitle) {
+                mainTitle.style.animationPlayState = 'running'; // タイトル点滅を開始
+            }
+        });
+
+        // スタートボタンがクリックされた時の処理
+        startButton.addEventListener('click', () => {
+            let playerName = playerNameInput.value.trim();
+
+            if (playerName === "") {
+                playerNameErrorMessage.textContent = "名前を入力してください";
+                playerNameErrorMessage.style.visibility = 'visible'; // エラーメッセージを表示
+                return; // ゲーム開始を中断
+            } else {
+                playerNameErrorMessage.style.visibility = 'hidden'; // エラーメッセージを非表示
+            }
+
+            // プレイヤー名を設定 (ここで入力値から取得)
+            gameState.playerName = playerName.substring(0, 10); // 最大10文字に制限
+
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            startButtonContainer.style.display = 'none';
+            document.getElementById('ui').style.display = 'flex';
+            gameContainer.style.display = 'block';
+
+            if (window.innerWidth < 600) {
+                document.getElementById('mobileControls').style.display = 'flex';
+            } else {
+                document.getElementById('mobileControls').style.display = 'none';
+            }
+            exitButton.style.display = 'block'; // ゲーム開始時にEXITボタンを表示
+            init();
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            gameLoop();
+            if (mainTitle) {
+                mainTitle.style.animationPlayState = 'paused'; // ゲーム開始で点滅を一時停止
+                mainTitle.style.opacity = 1; // 完全に表示された状態に
+            }
+        });
+
+        // 説明ボタンがクリックされた時の処理
+        explainButton.addEventListener('click', () => {
+            startButtonContainer.style.display = 'none'; // スタート画面を非表示
+            explanationOverlay.style.display = 'flex'; // 説明画面を表示
+            if (mainTitle) {
+                mainTitle.style.animationPlayState = 'paused'; // 説明画面表示で点滅を一時停止
+                mainTitle.style.opacity = 1; // 完全に表示された状態に
+            }
+        });
+
+        // 説明画面の閉じるボタンがクリックされた時の処理
+        closeExplanationButton.addEventListener('click', () => {
+            explanationOverlay.style.display = 'none'; // 説明画面を非表示
+            startButtonContainer.style.display = 'flex'; // スタート画面を再表示
+            if (mainTitle) {
+                mainTitle.style.animationPlayState = 'running'; // スタート画面に戻ったら点滅を再開
+            }
+        });
+
+        // --- ここから追加/修正したJavaScript ---
+        // ランキングボタンのイベントリスナー
+        rankingButton.addEventListener('click', () => {
+            spreadsheetOverlay.style.display = 'flex'; // スプレッドシートのオーバーレイを表示
+        });
+
+        // スプレッドシートを閉じるボタンのイベントリスナー
+        closeSpreadsheetButton.addEventListener('click', () => {
+            spreadsheetOverlay.style.display = 'none'; // スプレッドシートのオーバーレイを非表示
+        });
+        // --- ここまで追加/修正したJavaScript ---
+
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta property="og:description" content="ハマチとカンパチについてのゲームです。">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ハマチ／カンパチ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start2P&family=DotGothic16&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000; /* ゲームエリア外の背景色を黒に変更 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* 日本語フォントを優先し、英数字もそれに合うように調整 */
+            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+            color: #009900; /* 全体のUIテキスト色を深い緑に変更 */
+            overflow: hidden;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            font-weight: bold;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+            text-shadow: 2px 2px #006600; /* テキスト全体の影を深い緑に変更 */
+        }
+
+        #gameContainer, #startButtonContainer {
+            position: relative;
+            border: 2px solid #006600; /* ボーダー色を深い緑に変更 */
+            background: #0000ff; /* ゲームエリアの背景も青に */
+            box-sizing: border-box;
+            /* 外枠の影を追加 */
+            box-shadow: 4px 4px 0px 0px rgba(0, 102, 0, 0.7); /* X, Y, blur, spread, color */
+        }
+
+        canvas {
+            display: block;
+            background: #0000ff;
+            width: 100%;
+            height: 100%;
+        }
+
+        #ui {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-around;
+            padding: 5px 0;
+            box-sizing: border-box;
+            color: #009900; /* UIテキスト色を深い緑に */
+            font-size: clamp(12px, 2vw, 16px);
+            font-weight: bold;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+            text-shadow: 2px 2px #006600; /* UIテキストの影を深い緑に */
+            margin-bottom: 10px;
+        }
+        /* ライフ表示の色はそのまま維持 */
+        #ui #lives {
+            color: #ff3399; /* ハートマークの色をピンクに */
+            text-shadow: 2px 2px #cc0066;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #ff6699; /* ゲームオーバーテキスト色をピンクに */
+            font-size: clamp(18px, 4vw, 24px);
+            z-index: 100; /* 最前面に表示 */
+            display: none;
+            background-color: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #ff6699; /* ボーダー色もピンクに */
+            font-weight: bold;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest_neighbor;
+            text-shadow: 2px 2px #990033; /* ゲームオーバーテキストの影を深いピンクに変更 */
+            box-shadow: 0 0 20px rgba(255, 102, 153, 0.5); /* 視覚的に強調 */
+        }
+
+        #gameOver div {
+            margin-bottom: 5px;
+        }
+
+        #gameOver button {
+            background-color: #ff6699; /* ボタンの背景色をピンクに変更 */
+            color: #fff;
+            border: 2px solid #cc0066; /* ボーダー色を深いピンクに変更 */
+            padding: 10px 20px;
+            font-size: clamp(14px, 3vw, 18px);
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+            font-weight: bold;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+            text-shadow: 2px 2px #990033; /* ボタンの文字の影を深いピンクに変更 */
+        }
+
+        #gameOver button:hover {
+            background-color: #cc0066;
+        }
+
+        #mobileControls {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 30;
+            pointer-events: none;
+            gap: 10px;
+            box-sizing: border-box;
+            width: calc(100% - 20px);
+            max-width: 780px;
+            padding-bottom: 10px;
+        }
+
+        .control-button {
+            background-color: rgba(0, 153, 0, 0.2); /* ボタンの共通背景色を調整（薄い深い緑） */
+            border: 2px solid #006600; /* ボタンの共通ボーダー色を調整（深い緑） */
+            color: #009900; /* ボタンの共通文字色を調整（深い緑） */
+            font-size: clamp(16px, 4vw, 24px);
+            padding: 10px 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            flex-shrink: 0;
+            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+            pointer-events: auto;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: bold;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+            text-shadow: 2px 2px #006600;
+
+            height: clamp(50px, 12vw, 80px);
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #leftButton, #rightButton {
+            width: 60px;
+        }
+
+        .control-button.shoot {
+            font-size: clamp(14px, 3.2vw, 18px);
+            width: calc(50% - 70px);
+            flex-grow: 0;
+        }
+
+        .control-button.shoot-hamachi {
+            background-color: rgba(51, 153, 255, 0.2);
+            border: 2px solid #3399ff;
+            color: #66ccff;
+            text-shadow: 2px 2px #0066cc;
+        }
+
+        .control-button.shoot-kanpachi {
+            background-color: rgba(255, 51, 153, 0.2);
+            border: 2px solid #ff3399;
+            color: #ff66cc;
+            text-shadow: 2px 2px #cc0066;
+        }
+
+        #instructions {
+            display: none;
+        }
+
+        /* スタート画面のスタイル */
+        #startButtonContainer {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        #startButtonContainer h1 {
+            color: #ffcc00; /* タイトルの色 */
+            /* font-size: clamp(24px, 5vw, 60px); REMOVED: JSで動的に設定 */
+            margin-top: 30px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px #cc9900;
+            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+
+
+            /* 点滅アニメーション */
+            animation: retro-blink 1.6s steps(1, end) infinite; /* 2倍遅く */
+        }
+
+        @keyframes retro-blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; } /* 不透明度の変化を小さく */
+            100% { opacity: 1; }
+        }
+
+        #startButton, #explainButton, #rankingButton { /* #rankingButton を追加 */
+            /* padding, font-size, width, height を調整 */
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+            box-shadow: 4px 4px 0px 0px rgba(0, 102, 0, 0.7);
+            box-sizing: border-box; /* paddingとborderを幅に含める */
+            text-align: center; /* 文字を中央揃えに */
+        }
+
+        /* ゲームスタートボタンの黄色化 */
+        #startButton {
+            background-color: #ffcc00; /* 黄色 */
+            color: #fff; /* 文字色を白に調整 */
+            border: 2px solid #cc9900; /* 暗めの黄色 */
+            text-shadow: 3px 3px #996600; /* 影を濃く */
+            box-shadow: 4px 4px 0px 0px rgba(204, 153, 0, 0.7); /* 黄色の影 */
+            padding: 12px 25px; /* サイズ調整 */
+            font-size: clamp(14px, 3vw, 26px); /* サイズ調整 */
+            width: clamp(180px, 40vw, 280px); /* サイズ調整 */
+            margin-top: 20px; /* ここを10pxから20pxに増やす */
+        }
+        #startButton:hover {
+            background-color: #cc9900; /* ホバー時も暗めの黄色 */
+        }
+
+        /* ゲーム説明ボタンは既存の緑色を維持 */
+        #explainButton, #rankingButton { /* #rankingButton にも同じスタイルを適用 */
+            background-color: #009900;
+            color: #fff; /* 文字色は白を維持 */
+            border: 2px solid #006600;
+            text-shadow: 2px 2px #006600;
+            /* 名前入力欄の幅に合わせる */
+            width: clamp(150px, 40vw, 250px); /* playerNameInputと同じ幅 */
+            height: clamp(35px, 7vw, 50px); /* スタートボタンより少し小さめ */
+            padding: 8px 15px; /* パディングを調整 */
+            font-size: clamp(12px, 2.5vw, 20px); /* フォントサイズを調整 */
+            margin-top: 10px; /* 元々あったマージンは維持 */
+        }
+        #explainButton:hover, #rankingButton:hover { /* #rankingButton にも同じホバー効果を適用 */
+            background-color: #006600;
+        }
+
+        /* 名前入力とエラーメッセージのコンテナ */
+        #playerNameSection {
+            margin-top: 30px; /* 上のボタンとの間にスペースを増やす */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        #playerNameInput {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid #009900;
+            color: #ffcc00; /* 入力文字の色 */
+            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+            font-size: clamp(14px, 2.5vw, 20px);
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            text-align: center;
+            width: clamp(150px, 40vw, 250px);
+            box-sizing: border-box;
+            border-radius: 5px;
+            text-shadow: 1px 1px #006600;
+        }
+        /* placeholderのスタイル */
+        #playerNameInput::placeholder {
+            color: #006600; /* プレースホルダーの色 */
+            opacity: 0.8;
+            /* プレースホルダーにも影を追加 */
+            text-shadow: 1px 1px #003300; /* 少し暗めの影を設定 */
+        }
+
+        /* 名前入力エラーメッセージのスタイル */
+        #playerNameErrorMessage {
+            color: #ffcc00; /* 修正: 黄色に変更 */
+            text-shadow: 1px 1px #cc9900; /* 修正: 黄色系の影 */
+            font-size: clamp(12px, 2vw, 16px);
+            margin-bottom: 10px;
+            min-height: 20px; /* メッセージ表示領域をあらかじめ確保 */
+            visibility: hidden; /* 初期は非表示だがスペースは確保 */
+            /* 修正: テキストが中央に配置されるように調整し、動きを抑制 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2; /* テキストが表示された際の行の高さ */
+            box-sizing: border-box; /* paddingを含めて高さを計算 */
+        }
+
+        #rankingsContainer {
+            margin-top: 30px; /* ボタンの下に移動したのでマージン調整 */
+            margin-bottom: 40px; /* ★この行を追加して、下側に余白を作成 */
+            padding: 15px;
+            background-color: rgba(0,0,0,0.7);
+            border: 2px solid #009900;
+            border-radius: 8px;
+            color: #009900;
+            text-shadow: 2px 2px #006600;
+            font-size: clamp(14px, 2.5vw, 20px);
+            box-sizing: border-box;
+            /* --- 修正箇所 --- */
+            width: 90%; /* 親要素に対する割合で幅を指定 */
+            max-width: 400px; /* PCなど大きい画面での最大幅を制限 */
+            /* --- 修正ここまで --- */
+        }
+
+        #rankingsContainer h3 {
+            margin-top: 0;
+            color: #ffcc00; /* ランキングタイトルの色 */
+            text-shadow: 2px 2px #cc9900;
+            font-size: clamp(16px, 3vw, 24px);
+            margin-bottom: 10px;
+        }
+
+        #personalHighScore {
+            text-align: center;
+            font-size: clamp(18px, 3.5vw, 28px);
+            color: #ccffcc; /* 少し明るめの緑 */
+            text-shadow: 2px 2px #006600;
+        }
+
+        /* 説明画面のスタイル */
+        #explanationOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100; /* 最前面に表示 */
+            color: #fff;
+            padding: 20px;
+            box-sizing: border-box;
+            display: none; /* 初期は非表示 */
+            text-shadow: 1px 1px #000;
+        }
+
+        #explanationContent {
+            background-color: #003300; /* 説明コンテンツの背景色を濃い緑に */
+            border: 2px solid #009900;
+            border-radius: 8px;
+            padding: 25px;
+            max-width: 700px;
+            max-height: 90vh; /* 高さの最大値を設定 */
+            overflow-y: auto; /* コンテンツがはみ出したらスクロール */
+            text-align: left;
+            box-shadow: 0 0 30px rgba(0, 153, 0, 0.5);
+            color: #ccffcc; /* テキスト色を明るい緑に */
+            font-size: clamp(14px, 2.2vw, 18px);
+        }
+
+        #explanationContent h2 {
+            color: #ffcc00;
+            text-align: center;
+            margin-top: 20;
+            margin-bottom: 20px;
+            /* font-size: clamp(20px, 4vw, 32px); REMOVED: JSで動的に設定 */
+            text-shadow: 2px 2px #cc9900;
+            /* 修正: 文字折り返しと省略のCSSを削除 */
+            white-space: nowrap; /* 一行表示は維持 */
+            max-width: 100%; /* 親要素の幅に対して最大幅を設定 */
+            flex-shrink: 0; /* 縮小しない */
+            width: auto; /* 幅を自動調整 */
+            line-height: 1.2; /* 行の高さを調整 */
+            margin-left: auto; /* 中央寄せを確実に */
+        }
+
+        #explanationContent h3 {
+            color: #aaffee;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-size: clamp(16px, 2.8vw, 22px);
+            text-shadow: 1px 1px #6688aa;
+        }
+
+        #explanationContent p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        #explanationContent ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        #explanationContent li {
+            margin-bottom: 5px;
+        }
+        #explanationContent .close-button {
+            display: block;
+            width: fit-content;
+            margin: 20px auto 0;
+            padding: 10px 25px;
+            background-color: #009900;
+            color: #fff;
+            border: 2px solid #006600;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'DotGothic16', 'Press Start2P', cursive, monospace;
+            font-size: clamp(14px, 2.5vw, 20px);
+            text-shadow: 1px 1px #006600;
+        }
+        #explanationContent .close-button:hover {
+            background-color: #006600;
+        }
+
+        /* 敵ブロックの新しいスタイル */
+        .enemy-block {
+            background-color: #006600; /* 濃い緑 */
+            border: 2px solid #003300; /* さらに濃い緑のボーダー */
+            color: #99ff99; /* 明るい緑の文字 */
+            text-shadow: 2px 2px #003300; /* 濃い緑の文字影 */
+            box-shadow: 2px 2px 0px 0px rgba(0, 51, 0, 0.7); /* ブロックの影 */
+        }
+
+        /* EXITボタンのスタイル */
+        #exitButton {
+            position: fixed; /* 画面固定 */
+            bottom: 10px; /* 画面下からの位置 */
+            right: 10px; /* 画面右からの位置 */
+            padding: 8px 15px;
+            background-color: #990000; /* 赤系の色 */
+            color: #fff;
+            border: 2px solid #660000;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+            font-size: clamp(12px, 2vw, 16px);
+            text-shadow: 1px 1px #330000;
+            z-index: 1000; /* 他の要素よりも手前に表示 */
+            display: none; /* ゲーム開始まで非表示 */
+        }
+        #exitButton:hover {
+            background-color: #660000;
+        }
+
+
+        @media (min-width: 600px) {
+            #instructions {
+                display: block;
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+                color: #009900;
+                font-size: 12px;
+                z-index: 10;
+                font-weight: bold;
+                image-rendering: crisp-edges;
+                image-rendering: pixelated;
+                -ms-interpolation-mode: nearest_neighbor;
+                text-shadow: 2px 2px #006600;
+            }
+            #mobileControls {
+                display: none;
+            }
+        }
+
+        /* --- ここから追加したCSS --- */
+        /* スプレッドシートオーバーレイの基本スタイル */
+        #spreadsheetOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9); /* 半透明の黒背景、少し濃いめ */
+            display: none; /* 初期状態は非表示 */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* 他の要素より手前に表示 */
+            flex-direction: column; /* コンテンツとボタンを縦に並べる */
+        }
+
+        .overlay-content {
+            background-color: #000;
+            border: 2px solid #009900;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: hidden;
+            color: #009900;
+        }
+
+        .overlay-content iframe {
+            width: 450px;
+            height: 160px;
+            border: none; /* iframeの枠線を消す */
+            display: block;
+            margin: 0 auto;
+            overflow: auto; /* iframe自体のスクロールバーを必要に応じて表示 */
+        }
+
+        .overlay-content .close-button {
+             background-color: #009900;
+            color: #fff;
+            border: 2px solid #006600;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 15px; /* iframeの下にマージンを調整 */
+            font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+        }
+
+        .overlay-content .close-button:hover {
+            background-color: #006600;
+        }
+        /* --- ランキング画面をレトロPC風にするCSS --- */
+
+        /* モニター全体のコンテナ */
+        /* 差し替えるCSS */
+  #spreadsheetOverlay .overlay-content {
+      background-color: #003300; /* ★背景色をゲーム説明画面と同じ濃い緑に変更 */
+      border: 2px solid #009900;  /* ★ゲーム説明画面と同じ黄緑の枠線に変更 */
+      border-radius: 8px;
+      padding: 25px;
+      /* box-shadowと古いborder指定を削除 */
+      position: relative;
+      width: auto;
+      text-align: center;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: hidden;
+      color: #009900;
+  }
+/* iframe（画面部分）のスタイル */
+#spreadsheetOverlay iframe {
+    width: 295px;
+    height: 205px; /* ← 高さを200pxから95pxに変更 */
+    border: 2px solid #111;
+    border-radius: 8px;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.7);
+    background-color: #000;
+}
+
+}
+
+/* 閉じるボタンの調整 */
+#spreadsheetOverlay .close-button {
+    margin-top: 20px; /* iframeとの間隔を調整 */
+}
+/* --- iframeに重ねる画面枠オーバーレイ --- */
+/* 差し替えるコード (2/2) */
+#spreadsheetOverlay .overlay-content::before {
+    content: '';
+    position: absolute;
+    top: 21px;
+    left: 21px;
+    width: 303px;
+    height: 213px;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 15px #000080, 2px 2px 8px rgba(0,0,0,0.7);
+    pointer-events: none;
+
+    /* ★重なり順を「2」に設定（画面より手前に来る） */
+    z-index: 2;
+}
+/* 差し替えるコード (1/2) */
+#spreadsheetOverlay .iframe-wrapper {
+    position: relative;
+    width: 295px;
+    height: 205px;
+    border: 2px solid #111;
+    border-radius: 8px;
+    background-color: #000;
+    overflow: hidden;
+}
+    z-index: 1;
+
+    /* 既存の #startButtonContainer h1 のスタイルをこちらに差し替え */
+#startButtonContainer h1 {
+    color: #ffcc00; /* タイトルの色 */
+    /* font-sizeをclamp()で指定し、より大きくレスポンシブに */
+    font-size: clamp(36px, 8vw, 80px);
+    margin-top: 15px;
+    margin-bottom: 25px; /* 名前入力欄とのマージンを調整 */
+    text-shadow: 3px 3px #cc9900;
+    font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
+    white-space: nowrap;
+    max-width: 100%;
+    flex-shrink: 0;
+    width: auto;
+    line-height: 1.2;
+    margin-left: auto;
+    margin-right: auto;
+    animation: retro-blink 1.6s steps(1, end) infinite;
+}
+
+/* 既存の #playerNameSection のスタイルをこちらに差し替え */
+#playerNameSection {
+    /* 名前入力欄と下のボタンとのマージンを調整 */
+    margin-top: 0;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* 既存の #startButton のスタイルをこちらに差し替え */
+#startButton {
+    background-color: #ffcc00;
+    color: #fff;
+    border: 2px solid #cc9900;
+    text-shadow: 3px 3px #996600;
+    box-shadow: 4px 4px 0px 0px rgba(204, 153, 0, 0.7);
+    padding: 12px 25px;
+    font-size: clamp(16px, 3.5vw, 28px); /* 少し大きく */
+    width: clamp(200px, 50vw, 300px); /* 少し大きく */
+    margin-top: 15px; /* 説明ボタンとのマージン */
+}
+
+/* 既存の #explainButton, #rankingButton のスタイルをこちらに差し替え */
+#explainButton, #rankingButton {
+    background-color: #009900;
+    color: #fff;
+    border: 2px solid #006600;
+    text-shadow: 2px 2px #006600;
+    width: clamp(180px, 45vw, 280px); /* 少し大きく */
+    height: clamp(40px, 8vw, 55px);
+    padding: 8px 15px;
+    font-size: clamp(14px, 3vw, 22px); /* 少し大きく */
+    margin-top: 10px;
+}
+
+/* ランキングボタンから不要なマージン指定を削除 */
+#rankingButton {
+    margin-top: 10px;
+}
+
+/* --- スマホ表示でタイトル位置を調整するCSS --- */
+@media (max-width: 600px) {
+    #startButtonContainer h1#mainTitle {
         margin-top: 30vh; /* 画面の高さの5%分、上にマージンを追加 */
     }
 }
