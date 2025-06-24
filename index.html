@@ -214,14 +214,7 @@
             margin-bottom: 20px;
             text-shadow: 3px 3px #cc9900;
             font-family: 'DotGothic16', 'Press Start 2P', cursive, monospace;
-            /* 修正: 文字折り返しと省略のCSSを削除 */
-            white-space: nowrap; /* 一行表示は維持 */
-            max-width: 100%; /* 親要素の幅に対して最大幅を設定 */
-            flex-shrink: 0; /* 縮小しない */
-            width: auto; /* 幅を自動調整 */
-            line-height: 1.2; /* 行の高さを調整 */
-            margin-left: auto; /* 中央寄せを確実に */
-            margin-right: auto; /* 中央寄せを確実に */
+
 
             /* 点滅アニメーション */
             animation: retro-blink 1.6s steps(1, end) infinite; /* 2倍遅く */
@@ -391,7 +384,7 @@
         #explanationContent h2 {
             color: #ffcc00;
             text-align: center;
-            margin-top: 0;
+            margin-top: 20;
             margin-bottom: 20px;
             /* font-size: clamp(20px, 4vw, 32px); REMOVED: JSで動的に設定 */
             text-shadow: 2px 2px #cc9900;
@@ -402,7 +395,6 @@
             width: auto; /* 幅を自動調整 */
             line-height: 1.2; /* 行の高さを調整 */
             margin-left: auto; /* 中央寄せを確実に */
-            margin-right: auto; /* 中央寄せを確実に */
         }
 
         #explanationContent h3 {
