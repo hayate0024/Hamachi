@@ -332,9 +332,11 @@
             color: #009900;
             text-shadow: 2px 2px #006600;
             font-size: clamp(14px, 2.5vw, 20px);
-            max-width: 90%;
             box-sizing: border-box;
-            width: clamp(250px, 60vw, 400px); /* ランキングコンテナの幅も調整 */
+            /* --- 修正箇所 --- */
+            width: 90%; /* 親要素に対する割合で幅を指定 */
+            max-width: 400px; /* PCなど大きい画面での最大幅を制限 */
+            /* --- 修正ここまで --- */
         }
 
         #rankingsContainer h3 {
