@@ -744,7 +744,7 @@
     <audio id="audio-vu" src="vu.mp3" preload="auto"></audio>
     <audio id="audio-start" src="start.mp3" preload="auto"></audio>
     <audio id="audio-clear" src="clear.mp3" preload="auto"></audio>
-    <audio id="audio-retry" src="retry.mp3" preload="auto"></audio>
+    <audio id="audio-retry"src="retry.mp3" preload="auto"></audio>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -814,7 +814,7 @@
         const ENEMY_AUTO_DROP_FACTOR = 0.25;
         const ENEMY_SHOOT_CHANCE_BASE = 0.01;
         const ENEMY_SHOOT_CHANCE_LEVEL_FACTOR = 0.5;
-        
+
         const BASE_AUTO_DROP_INTERVAL = 5000;
         const LEVEL_DROP_INTERVAL_REDUCTION = 250;
         const MIN_DROP_INTERVAL = 1200;
@@ -979,7 +979,7 @@
             if (gameState.playerTargetPositions.length > 0) {
                 const middleIndex = Math.floor(gameState.playerTargetPositions.length / 2);
                 gameState.currentPlayerTargetIndex = middleIndex;
-                gameState.player.x = gameState.playerTargetPositions[gameState.currentPlayerTargetIndex] - gameState.player.width / 2;
+                gameState.player.x = gameState.playerTargetPositions[middleIndex] - gameState.player.width / 2;
             }
 
             document.getElementById('gameOver').style.display = 'none';
@@ -1130,12 +1130,19 @@
                         if (isMatch) {
                             enemy.alive = false;
                             gameState.score += 10;
-                            if (bullet.type === 'hamachi') {
-                                playSound('audio-hamachi');
+                            
+                            // 最後の敵かどうかをチェック
+                            if (!gameState.enemies.some(e => e.alive)) {
+                                playSound('audio-clear');
                             } else {
-                                playSound('audio-kanpachi');
+                                if (bullet.type === 'hamachi') {
+                                    playSound('audio-hamachi');
+                                } else {
+                                    playSound('audio-kanpachi');
+                                }
                             }
                         } else {
+                            gameState.score = Math.max(0, gameState.score - 5); // 間違えたら5点引く（0点未満にはしない）
                             playSound('audio-chigau');
                             dropAllEnemies(dropAmountCollision);
                         }
@@ -1181,9 +1188,6 @@
         function checkLevelUp() {
             if (gameState.enemies.length > 0 && !gameState.enemies.some(e => e.alive)) {
                 gameState.level++;
-                setTimeout(() => {
-                    playSound('audio-clear');
-                }, 1500);
                 createEnemies();
                 if (gameState.playerTargetPositions.length > 0) {
                     const middleIndex = Math.floor(gameState.playerTargetPositions.length / 2);
@@ -1321,7 +1325,7 @@
                 console.error('Error submitting score to Google Form:', error);
             }
         }
-        
+
         function refreshRankingSource() {
             rankingIframe.src = BASE_RANKING_URL + '&timestamp=' + new Date().getTime();
         }
@@ -1389,7 +1393,7 @@
                     console.warn("Web Audio API not supported.", e);
                 }
             }
-            
+
             document.querySelectorAll('audio').forEach(audio => {
                 const promise = audio.play();
                 if (promise !== undefined) {
@@ -1400,8 +1404,12 @@
                 }
             });
 
-            playSound('audio-start');
-            
+            // 0.5秒後にスタート音を再生
+            setTimeout(() => {
+                playSound('audio-start');
+            }, 500);
+
+
             startButtonContainer.style.display = 'none';
             ui.style.display = 'flex';
             gameContainer.style.display = 'block';
@@ -1440,7 +1448,7 @@
             refreshRankingSource();
             showStartScreen();
         });
-        
+
         exitButton.addEventListener('click', showStartScreen);
 
     </script>
