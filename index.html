@@ -199,10 +199,6 @@
             text-shadow: 2px 2px var(--color-text-lives-shadow);
         }
 
-        #instructions {
-            display: none;
-        }
-
         /* --- スタート画面のレイアウト調整 --- */
         #startButtonContainer {
             display: flex;
@@ -527,21 +523,6 @@
                 background-position-y: 4px;
             }
         }
-
-
-        @media (min-width: 600px) {
-            #instructions {
-                display: block;
-                position: absolute;
-                bottom: 10px;
-                left: 10px;
-                font-size: 12px;
-                z-index: 10;
-            }
-            #mobileControls {
-                display: none;
-            }
-        }
     </style>
 </head>
 <body>
@@ -557,9 +538,6 @@
             <div>最終スコア: <span id="finalScore">0</span></div>
             <div id="yourRank"></div>
             <button id="restartButton">もどる</button>
-        </div>
-        <div id="instructions">
-            矢印キー: 移動 | スペース: ハマチショット | エンター: カンパチショット | R: リスタート | D: デバッグラインON
         </div>
 
         <div id="mobileControls" style="display: none;">
@@ -725,7 +703,7 @@
                     </ul>
                 </li>
             </ul>
-            <p>
+            <p>この知識が他で活きることもきっとあるはず。それでは頑張りましょう。</p>
             <button class="close-button" id="closeExplanationButton">閉じる</button>
         </div>
     </div>
@@ -1038,23 +1016,11 @@
         function handleKeyDown(e) {
             if (explanationOverlay.style.display === 'flex' || spreadsheetOverlay.style.display === 'flex' || gameState.gameOver) return;
             gameState.keys[e.key] = true;
-            const actions = {
-                'ArrowLeft': () => movePlayer(-1),
-                'ArrowRight': () => movePlayer(1),
-                ' ': () => shoot('hamachi'),
-                'Enter': () => shoot('kanpachi'),
-                'd': () => toggleDebug(), 'D': () => toggleDebug()
-            };
-            if (actions[e.key]) {
-                e.preventDefault();
-                actions[e.key]();
-            }
+            // キーボード操作はマウス操作と併存させても良いが、今回は削除
         }
 
         function toggleDebug() {
             showDebugLines = !showDebugLines;
-            const instructions = document.getElementById('instructions');
-            instructions.textContent = instructions.textContent.replace(/ON|OFF/, showDebugLines ? 'ON' : 'OFF');
         }
 
         function movePlayer(direction) {
@@ -1131,7 +1097,7 @@
                         if (isMatch) {
                             enemy.alive = false;
                             gameState.score += 10;
-                            
+
                             // 最後の敵かどうかをチェック
                             if (!gameState.enemies.some(e => e.alive)) {
                                 playSound('audio-clear');
@@ -1366,6 +1332,12 @@
         document.addEventListener('keyup', (e) => { gameState.keys[e.key] = false; });
 
         const addTouchListener = (element, action) => {
+            // マウスイベントも追加
+            element.addEventListener('mousedown', (e) => {
+                if (gameState.gameOver) return;
+                e.preventDefault();
+                action();
+            }, { passive: false });
             element.addEventListener('touchstart', (e) => {
                 if (gameState.gameOver) return;
                 e.preventDefault();
@@ -1414,9 +1386,8 @@
             startButtonContainer.style.display = 'none';
             ui.style.display = 'flex';
             gameContainer.style.display = 'block';
-            if (window.innerWidth < 600) {
-                document.getElementById('mobileControls').style.display = 'flex';
-            }
+            // PCでも常にモバイルコントロールを表示
+            document.getElementById('mobileControls').style.display = 'flex';
             exitButton.style.display = 'block';
 
             init();
