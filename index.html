@@ -29,7 +29,7 @@
             --color-text-gameover-shadow: #990033;
             --color-text-placeholder: #006600;
             --color-text-white: #fff;
-            
+
             --color-border-main: #006600;
             --color-border-title: #cc9900;
             --color-border-gameover: #ff6699;
@@ -91,7 +91,7 @@
             font-size: clamp(12px, 2vw, 16px);
             margin-bottom: 10px;
         }
-        
+
         #ui #lives {
             color: var(--color-text-lives);
             text-shadow: 2px 2px var(--color-text-lives-shadow);
@@ -198,7 +198,7 @@
             color: #ff66cc;
             text-shadow: 2px 2px var(--color-text-lives-shadow);
         }
-        
+
         #instructions {
             display: none;
         }
@@ -207,22 +207,22 @@
         #startButtonContainer {
             display: flex;
             flex-direction: column;
-            justify-content: center; /* 垂直方向中央を基準に */
+            justify-content: center;
             align-items: center;
             z-index: 50;
             padding: 20px;
             text-align: center;
-            height: 100%; /* コンテナの高さを100%に */
+            height: 100%;
         }
 
         #startButtonContainer h1 {
             color: var(--color-text-title);
-            font-size: clamp(32px, 8vw, 70px); /* フォントサイズ調整 */
-            margin: 0 0 25px 0; /* マージン調整 */
+            font-size: clamp(32px, 8vw, 70px);
+            margin: 0 0 25px 0;
             text-shadow: 3px 3px var(--color-text-title-shadow);
             animation: retro-blink 1.6s steps(1, end) infinite;
         }
-        
+
         @keyframes retro-blink {
             0% { opacity: 1; }
             50% { opacity: 0.7; }
@@ -236,8 +236,8 @@
             box-shadow: var(--shadow-box-main);
             box-sizing: border-box;
             text-align: center;
-            width: clamp(200px, 60vw, 320px); /* 幅を統一 */
-            margin-bottom: 15px; /* ボタン間のマージン */
+            width: clamp(200px, 60vw, 320px);
+            margin-bottom: 15px;
         }
 
         #startButton {
@@ -248,7 +248,7 @@
             box-shadow: var(--shadow-box-title);
             padding: 12px 25px;
             font-size: clamp(16px, 3.5vw, 28px);
-            order: 1; /* 表示順序: 1番目 */
+            order: 1;
         }
         #startButton:hover {
             background-color: var(--color-text-title-shadow);
@@ -267,9 +267,9 @@
             background-color: var(--color-text-shadow-main);
         }
 
-        #explainButton { order: 2; } /* 表示順序: 2番目 */
-        #rankingButton { order: 3; } /* 表示順序: 3番目 */
-        
+        #explainButton { order: 2; }
+        #rankingButton { order: 3; }
+
         #playerNameSection {
             margin-bottom: 20px;
             display: flex;
@@ -284,15 +284,15 @@
             color: var(--color-text-title);
             font-family: var(--font-retro);
             font-size: clamp(14px, 2.5vw, 20px);
-            padding: 10px 15px; /* 少し大きく */
+            padding: 10px 15px;
             margin-bottom: 5px;
             text-align: center;
-            width: clamp(200px, 60vw, 320px); /* ボタンと幅を合わせる */
+            width: clamp(200px, 60vw, 320px);
             box-sizing: border-box;
             border-radius: 5px;
             text-shadow: 1px 1px var(--color-text-shadow-main);
         }
-        
+
         #playerNameInput::placeholder {
             color: var(--color-text-placeholder);
             opacity: 0.8;
@@ -312,29 +312,14 @@
             line-height: 1.2;
             box-sizing: border-box;
         }
-        
-        /* 「あなたの最高得点」の枠を削除しテキストのみに */
-        #rankingsContainer {
-            margin-top: 30px;
-            background: none;
-            border: none;
-            padding: 0;
-            box-shadow: none;
-            order: 4; /* 表示順序: 最後 */
-        }
 
-        #rankingsContainer h3 {
-            margin-top: 0;
-            color: var(--color-text-title);
-            text-shadow: 2px 2px var(--color-text-title-shadow);
-            font-size: clamp(14px, 3vw, 20px); /* サイズ調整 */
-            margin-bottom: 10px;
-        }
-
+        /* ★ 最高得点表示用のスタイル */
         #personalHighScore {
-            text-align: center;
-            font-size: clamp(18px, 3.5vw, 28px);
+            order: 4; /* 表示順序: 最後 */
+            margin-top: 30px;
+            font-size: clamp(16px, 3.5vw, 24px);
             color: var(--color-text-light);
+            text-shadow: 2px 2px var(--color-text-shadow-main);
         }
         /* --- スタート画面の調整ここまで --- */
 
@@ -404,7 +389,7 @@
         #explanationContent li {
             margin-bottom: 5px;
         }
-        
+
         .close-button {
             display: block;
             width: fit-content;
@@ -490,7 +475,7 @@
             z-index: 1;
             animation: retro-flicker-on-off 2s infinite steps(1, end);
         }
-        
+
         #spreadsheetOverlay .iframe-wrapper::after {
             content: '';
             position: absolute;
@@ -535,7 +520,7 @@
         #spreadsheetOverlay .close-button {
             margin-top: 20px;
         }
-        
+
         @keyframes retro-flicker-on-off {
             0%, 49.9% {
                 opacity: 1;
@@ -544,7 +529,7 @@
                 opacity: 0.6;
             }
         }
-        
+
         @keyframes scanline-scroll {
             from {
                 background-position-y: 0;
@@ -617,10 +602,8 @@
           ランキング
       </button>
 
-      <div id="rankingsContainer">
-          <h3>あなたの最高得点</h3>
-          <span id="personalHighScore">まだスコアがありません</span>
-      </div>
+      <div id="personalHighScore">あなたの最高得点: まだありません</div>
+
     </div>
 
     <div id="explanationOverlay">
@@ -698,6 +681,12 @@
             <button id="closeSpreadsheetButton" class="close-button">閉じる</button>
         </div>
     </div>
+
+    <audio id="audio-hamachi" src="hamachi.mp3" preload="auto"></audio>
+    <audio id="audio-kanpachi" src="kanpachi.mp3" preload="auto"></audio>
+    <audio id="audio-chigau" src="chigau.mp3" preload="auto"></audio>
+    <audio id="audio-vu" src="vu.mp3" preload="auto"></audio>
+
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -709,8 +698,7 @@
         const rankingButton = document.getElementById('rankingButton');
         const explanationOverlay = document.getElementById('explanationOverlay');
         const closeExplanationButton = document.getElementById('closeExplanationButton');
-        const rankingsContainer = document.getElementById('rankingsContainer');
-        const personalHighScoreDisplay = document.getElementById('personalHighScore');
+        const personalHighScoreDisplay = document.getElementById('personalHighScore'); // ★ ID変更
         const playerNameInput = document.getElementById('playerNameInput');
         const playerNameErrorMessage = document.getElementById('playerNameErrorMessage');
         const yourRankDisplay = document.getElementById('yourRank');
@@ -779,7 +767,7 @@
         const PLAYER_BULLET_COLOR_KANPACHI = '#ff99cc';
         const ENEMY_BULLET_COLOR = '#ff6666';
         const ENEMY_BULLET_SHADOW_COLOR = '#993333';
-        
+
         let frameCount = 0;
         let UNIFIED_ENEMY_FONT_SIZE = 0;
         let showDebugLines = true;
@@ -804,6 +792,15 @@
             currentPlayerTargetIndex: 0,
             personalHighScore: 0
         };
+
+        // ★ 音声再生用の関数
+        function playSound(soundId) {
+            const sound = document.getElementById(soundId);
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(e => console.error("Audio play failed:", e));
+            }
+        }
 
         function getScaleFactor() {
             return canvas.width > 0 ? canvas.width / ORIGINAL_CANVAS_WIDTH : 1;
@@ -871,7 +868,7 @@
             createObserver(mainTitle, 70, 10, 0.98);
             createObserver(explanationTitle, 32, 10, 0.98);
         }
-        
+
         function cacheEnemyStyles() {
             const tempDiv = document.createElement('div');
             tempDiv.className = 'enemy-block';
@@ -900,7 +897,7 @@
 
             calculateUnifiedEnemyFontSize();
             createEnemies();
-            
+
             Object.assign(gameState, {
                 bullets: [],
                 enemyBullets: [],
@@ -971,7 +968,7 @@
                 pos >= playerHalfWidth && pos <= canvas.width - playerHalfWidth
             );
         }
-        
+
         function handleKeyDown(e) {
             if (explanationOverlay.style.display === 'flex' || spreadsheetOverlay.style.display === 'flex' || gameState.gameOver) return;
             gameState.keys[e.key] = true;
@@ -987,7 +984,7 @@
                 actions[e.key]();
             }
         }
-        
+
         function toggleDebug() {
             showDebugLines = !showDebugLines;
             const instructions = document.getElementById('instructions');
@@ -1081,9 +1078,15 @@
                         if (isMatch) {
                             enemy.alive = false;
                             gameState.score += 10;
-                            playBeep(bullet.type === 'hamachi' ? 600 : 400, 'square', 0.1, 0.7);
+                            // ★ 正解音を再生
+                            if (bullet.type === 'hamachi') {
+                                playSound('audio-hamachi');
+                            } else {
+                                playSound('audio-kanpachi');
+                            }
                         } else {
-                            playBeep(200, 'sawtooth', 0.15, 0.5);
+                            // ★ 不正解音を再生
+                            playSound('audio-chigau');
                             dropAllEnemies(dropAmountCollision);
                         }
                         gameState.bullets.splice(i, 1);
@@ -1096,14 +1099,16 @@
                 if (isColliding(bullet, gameState.player)) {
                     gameState.enemyBullets.splice(i, 1);
                     gameState.lives--;
-                    playBeep(150, 'square', 0.2, 0.8);
+                    // ★ 被弾音を再生
+                    playSound('audio-vu');
                     dropAllEnemies(dropAmountCollision);
                     if (gameState.lives <= 0) setGameOver();
                 }
             }
             for (const enemy of gameState.enemies) {
                 if (enemy.alive && isColliding(enemy, gameState.player)) {
-                    playBeep(150, 'square', 0.2, 0.8);
+                    // ★ 被弾音を再生
+                    playSound('audio-vu');
                     setGameOver();
                     break;
                 }
@@ -1119,7 +1124,7 @@
             gameState.gameOver = true;
             document.getElementById('gameOver').style.display = 'block';
             document.getElementById('finalScore').textContent = gameState.score;
-            playBeep(100, 'triangle', 0.5, 0.9);
+            playBeep(100, 'triangle', 0.5, 0.9); // ゲームオーバー音はシンセ音のまま
             saveHighScore(gameState.score);
             submitScoreToGoogleForm(gameState.playerName, gameState.score);
             yourRankDisplay.textContent = "";
@@ -1138,15 +1143,15 @@
                 gameState.lastEnemyAutoDropTime = performance.now();
             }
         }
-        
+
         function drawWater() {
             const waterSurfaceY = scale(ENEMY_START_Y_OFFSET) + scale(WATER_SURFACE_Y_OFFSET_FROM_ENEMY_TOP);
             const waveAmplitude = scale(WAVE_AMPLITUDE_BASE);
             const waveFrequency = WAVE_FREQUENCY_BASE;
-            
+
             ctx.fillStyle = WATER_COLOR_BOTTOM;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+
             ctx.beginPath();
             ctx.moveTo(0, waterSurfaceY);
             for (let x = 0; x <= canvas.width; x += scale(4)) {
@@ -1196,25 +1201,25 @@
                 ctx.fillStyle = ENEMY_BULLET_COLOR;
                 ctx.fillRect(b.x, b.y, b.width, b.height);
             });
-            
+
             ctx.font = `bold ${UNIFIED_ENEMY_FONT_SIZE}px 'DotGothic16', 'Press Start 2P'`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            
+
             for (const enemy of gameState.enemies) {
                 if (!enemy.alive) continue;
                 ctx.fillStyle = enemyBlockStyles.shadowColor || '#003300';
                 ctx.fillRect(enemy.x + scale(2), enemy.y + scale(2), enemy.width, enemy.height);
                 ctx.fillStyle = enemyBlockStyles.mainColor || '#006600';
                 ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-                
+
                 ctx.fillStyle = enemyBlockStyles.textShadowColor || '#003300';
                 ctx.fillText(enemy.text, enemy.x + enemy.width / 2 + scale(2), enemy.y + enemy.height / 2 + scale(2));
                 ctx.fillStyle = enemyBlockStyles.textColor || '#99ff99';
                 ctx.fillText(enemy.text, enemy.x + enemy.width / 2, enemy.y + enemy.height / 2);
             }
         }
-        
+
         function updateUI() {
             document.getElementById('score').textContent = gameState.score;
             document.getElementById('lives').textContent = gameState.lives;
@@ -1248,10 +1253,13 @@
             displayHighScore();
         }
 
+        // ★ 最高得点表示を1行にまとめるよう修正
         function displayHighScore() {
-            personalHighScoreDisplay.textContent = gameState.personalHighScore > 0
-                ? `${gameState.personalHighScore} 点`
-                : 'まだスコアがありません';
+            if (personalHighScoreDisplay) {
+                personalHighScoreDisplay.textContent = gameState.personalHighScore > 0
+                    ? `あなたの最高得点: ${gameState.personalHighScore} 点`
+                    : 'あなたの最高得点: まだありません';
+            }
         }
 
         async function submitScoreToGoogleForm(playerName, score) {
@@ -1265,7 +1273,7 @@
                 console.error('Error submitting score to Google Form:', error);
             }
         }
-        
+
         function showStartScreen() {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
             gameState.gameOver = true;
@@ -1299,7 +1307,7 @@
 
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keyup', (e) => { gameState.keys[e.key] = false; });
-        
+
         const addTouchListener = (element, action) => {
             element.addEventListener('touchstart', (e) => {
                 if (gameState.gameOver) return;
@@ -1321,7 +1329,7 @@
             }
             playerNameErrorMessage.style.visibility = 'hidden';
             gameState.playerName = playerName.substring(0, 10);
-            
+
             if (!audioContext) {
                 try {
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1329,6 +1337,13 @@
                     console.warn("Web Audio API not supported.", e);
                 }
             }
+
+            // ★ ユーザー操作によるオーディオ再生の有効化
+            playSound('audio-hamachi');
+            playSound('audio-kanpachi');
+            playSound('audio-chigau');
+            playSound('audio-vu');
+            document.querySelectorAll('audio').forEach(audio => audio.pause());
 
             startButtonContainer.style.display = 'none';
             ui.style.display = 'flex';
@@ -1362,7 +1377,7 @@
         closeSpreadsheetButton.addEventListener('click', () => {
             spreadsheetOverlay.style.display = 'none';
         });
-        
+
         restartButton.addEventListener('click', showStartScreen);
         exitButton.addEventListener('click', showStartScreen);
 
