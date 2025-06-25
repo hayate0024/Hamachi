@@ -473,7 +473,6 @@
             background-color: #000;
             overflow: hidden;
             z-index: 1;
-            animation: retro-flicker-on-off 2s infinite steps(1, end);
         }
 
         #spreadsheetOverlay .iframe-wrapper::after {
@@ -519,15 +518,6 @@
 
         #spreadsheetOverlay .close-button {
             margin-top: 20px;
-        }
-
-        @keyframes retro-flicker-on-off {
-            0%, 49.9% {
-                opacity: 1;
-            }
-            50%, 100% {
-                opacity: 0.6;
-            }
         }
 
         @keyframes scanline-scroll {
@@ -615,9 +605,8 @@
             </p>
             <h3>基本的なルール</h3>
             <ul>
-                <li>プレイヤーは左右に移動できます。</li>         
-                <li>画面上部からはこのゲームに迷い込んだ魚（ブロック）が降ってきます。</li>
-            　  <li>降ってくる魚の名前を読み、「ハマチ」の仲間なのか「カンパチ」の仲間なのかを判断し、適切な種類のショットで仕分けていきましょう。</li>
+                <li>プレイヤーは左右に移動できます。</li>
+                <li>魚の名前を見て「ハマチ」の仲間なのか「カンパチ」の仲間なのかを判断し、適切な種類のショットで仕分けていきましょう。</li>
                 <li>「ハマチ！」ボタンで「ハマチショット」（青い弾）を発射。</li>
                 <li>「カンパチ！」ボタンで「カンパチショット」（ピンクの弾）を発射。</li>
                 <li>弾があたると魚は消えます（元の世界に帰ります）。</li>
@@ -635,7 +624,6 @@
             <ul>
                 <li>一般的な呼び名（大きさによる目安）
                     <ul>
-                        <li>モジャコ: 稚魚（稚魚全般を指すこともあります）</li>
                         <li>ワカシ/ツバス/ショゴなど: 35cm以下の幼魚。小さい段階。</li>
                         <li>イナダ/ハマチ/フクラギなど: 35～60cm程度の若魚。</li>
                         <li>ワラサ/メジロ/ガンドなど: 60～80cm程度の中型魚。</li>
@@ -704,7 +692,6 @@
                                 <li>シオゴ (60cmまで)</li>
                                 <li>アカハナ (80cmまで)</li>
                                 <li>カンパチ (80cm以上)</li>
-                                <li>その他、稚魚を「モジャコ」と呼ぶこともあります。</li>
                             </ul>
                         </li>
                         <li>関西地方:
@@ -729,6 +716,13 @@
                                 <li>カンパチ (成魚)</li>
                             </ul>
                         </li>
+                        <li>その他の地域・呼び名:
+                            <ul>
+                                <li>アカイオ: 新潟県など北陸地方での呼び名。</li>
+                                <li>ヒヨ: 神奈川県での呼び名。</li>
+                                <li>チギリキ: 和歌山県や高知県での呼び名。</li>
+                            </ul>
+                        </li>
                     </ul>
                 </li>
             </ul>
@@ -740,7 +734,7 @@
     <div id="spreadsheetOverlay" class="overlay">
         <div class="overlay-content">
             <div class="iframe-wrapper">
-                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRa0Q9xStdlDqAY18a_bpeyoGskywpikXjWiLNS9LKW_Km9Mg2uATO-vpVZhA_62JUde483QB4FSNUg/pubhtml?gid=493938141&amp;single=true&amp;widget=false&amp;headers=false&amp;gridlines=false&amp;range=A1:E6&amp;chrome=false"></iframe>
+                <iframe id="rankingIframe" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRa0Q9xStdlDqAY18a_bpeyoGskywpikXjWiLNS9LKW_Km9Mg2uATO-vpVZhA_62JUde483QB4FSNUg/pubhtml?gid=493938141&amp;single=true&amp;widget=false&amp;headers=false&amp;gridlines=false&amp;range=A1:E6&amp;chrome=false"></iframe>
             </div>
             <button id="closeSpreadsheetButton" class="close-button">閉じる</button>
         </div>
@@ -762,7 +756,7 @@
         const rankingButton = document.getElementById('rankingButton');
         const explanationOverlay = document.getElementById('explanationOverlay');
         const closeExplanationButton = document.getElementById('closeExplanationButton');
-        const personalHighScoreDisplay = document.getElementById('personalHighScore'); // ★ ID変更
+        const personalHighScoreDisplay = document.getElementById('personalHighScore');
         const playerNameInput = document.getElementById('playerNameInput');
         const playerNameErrorMessage = document.getElementById('playerNameErrorMessage');
         const yourRankDisplay = document.getElementById('yourRank');
@@ -771,21 +765,24 @@
         const closeSpreadsheetButton = document.getElementById('closeSpreadsheetButton');
         const mainTitle = document.getElementById('mainTitle');
         const explanationTitle = document.getElementById('explanationTitle');
+        const rankingIframe = document.getElementById('rankingIframe');
 
         const GOOGLE_FORM_URL = 'https://docs.google.com/forms/u/0/d/e/1FAIpQLSc_Nch5Rt2IvGJb3h6-V4JeTkeJ76Xy0OhcES7zB2-0fwwdtg/formResponse';
         const FORM_PLAYER_NAME_ENTRY_ID = 'entry.1723250269';
         const FORM_SCORE_ENTRY_ID = 'entry.2114519163';
+        const BASE_RANKING_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRa0Q9xStdlDqAY18a_bpeyoGskywpikXjWiLNS9LKW_Km9Mg2uATO-vpVZhA_62JUde483QB4FSNUg/pubhtml?gid=493938141&single=true&widget=false&headers=false&gridlines=false&range=A1:E6&chrome=false';
+
 
         const ORIGINAL_CANVAS_WIDTH = 800;
         const ORIGINAL_CANVAS_HEIGHT = 800;
 
         const HAMACHI_WORDS = [
-            'モジャコ', 'ワカシ', 'ツバス', 'コゾクラ', 'ヤズ', 'アブコ', 'ショゴ',
+            'ワカシ', 'ツバス', 'コゾクラ', 'ヤズ', 'アブコ', 'ショゴ',
             'イナダ', 'ハマチ', 'フクラギ', 'ガンド', 'ワカナ', 'ワラサ', 'メジロ',
             'オオイナダ', 'ブリ'
         ];
         const KANPACHI_WORDS = [
-            'ショッコ', 'シオッコ', 'シオ', 'アカバナ', 'アカバネ', 'カンパチ', 'シオゴ',
+            'ショッコ', 'シオッコ', 'シオ', 'アカバナ', 'アカバネ', 'アカハナ', 'カンパチ', 'シオゴ',
             'カンコ', 'ニリ', 'ニノコ', 'ネイゴ', 'アカバラ', 'ヒラゴ', 'ヒラス',
             'シオマー', 'ヒヨ', 'チギリキ', 'アカイオ'
         ];
@@ -812,10 +809,15 @@
         const SHOOT_COOLDOWN = 200;
         const PLAYER_GRID_MOVE_AMOUNT = 1;
         const ENEMY_DROP_AMOUNT_COLLISION = 20;
-        const ENEMY_AUTO_DROP_INTERVAL = 5000;
         const ENEMY_AUTO_DROP_FACTOR = 0.25;
         const ENEMY_SHOOT_CHANCE_BASE = 0.01;
         const ENEMY_SHOOT_CHANCE_LEVEL_FACTOR = 0.5;
+
+        // --- ★レベルによる速度調整用の定数 ---
+        const BASE_AUTO_DROP_INTERVAL = 5000; // レベル1での落下間隔 (ミリ秒)
+        const LEVEL_DROP_INTERVAL_REDUCTION = 250; // 1レベルごとに短くなる時間 (ミリ秒)
+        const MIN_DROP_INTERVAL = 1200; // 最短の落下間隔 (ミリ秒)
+        // --- ★ここまで ---
 
         const WATER_SURFACE_Y_OFFSET_FROM_ENEMY_TOP = -50;
         const WAVE_AMPLITUDE_BASE = 6;
@@ -857,7 +859,6 @@
             personalHighScore: 0
         };
 
-        // ★ 音声再生用の関数
         function playSound(soundId) {
             const sound = document.getElementById(soundId);
             if (sound) {
@@ -1098,7 +1099,9 @@
                 }
             }
             const currentTime = performance.now();
-            if (currentTime - gameState.lastEnemyAutoDropTime > ENEMY_AUTO_DROP_INTERVAL) {
+            // ★レベルに応じて落下間隔を計算
+            const currentDropInterval = Math.max(MIN_DROP_INTERVAL, BASE_AUTO_DROP_INTERVAL - ((gameState.level - 1) * LEVEL_DROP_INTERVAL_REDUCTION));
+            if (currentTime - gameState.lastEnemyAutoDropTime > currentDropInterval) {
                 dropAllEnemies(scale(ENEMY_BASE_HEIGHT * ENEMY_AUTO_DROP_FACTOR));
                 gameState.lastEnemyAutoDropTime = currentTime;
             }
@@ -1142,14 +1145,12 @@
                         if (isMatch) {
                             enemy.alive = false;
                             gameState.score += 10;
-                            // ★ 正解音を再生
                             if (bullet.type === 'hamachi') {
                                 playSound('audio-hamachi');
                             } else {
                                 playSound('audio-kanpachi');
                             }
                         } else {
-                            // ★ 不正解音を再生
                             playSound('audio-chigau');
                             dropAllEnemies(dropAmountCollision);
                         }
@@ -1163,7 +1164,6 @@
                 if (isColliding(bullet, gameState.player)) {
                     gameState.enemyBullets.splice(i, 1);
                     gameState.lives--;
-                    // ★ 被弾音を再生
                     playSound('audio-vu');
                     dropAllEnemies(dropAmountCollision);
                     if (gameState.lives <= 0) setGameOver();
@@ -1171,7 +1171,6 @@
             }
             for (const enemy of gameState.enemies) {
                 if (enemy.alive && isColliding(enemy, gameState.player)) {
-                    // ★ 被弾音を再生
                     playSound('audio-vu');
                     setGameOver();
                     break;
@@ -1188,7 +1187,7 @@
             gameState.gameOver = true;
             document.getElementById('gameOver').style.display = 'block';
             document.getElementById('finalScore').textContent = gameState.score;
-            playBeep(100, 'triangle', 0.5, 0.9); // ゲームオーバー音はシンセ音のまま
+            playBeep(100, 'triangle', 0.5, 0.9);
             saveHighScore(gameState.score);
             submitScoreToGoogleForm(gameState.playerName, gameState.score);
             yourRankDisplay.textContent = "";
@@ -1317,7 +1316,6 @@
             displayHighScore();
         }
 
-        // ★ 最高得点表示を1行にまとめるよう修正
         function displayHighScore() {
             if (personalHighScoreDisplay) {
                 personalHighScoreDisplay.textContent = gameState.personalHighScore > 0
@@ -1402,12 +1400,15 @@
                 }
             }
 
-            // ★ ユーザー操作によるオーディオ再生の有効化
-            playSound('audio-hamachi');
-            playSound('audio-kanpachi');
-            playSound('audio-chigau');
-            playSound('audio-vu');
-            document.querySelectorAll('audio').forEach(audio => audio.pause());
+            document.querySelectorAll('audio').forEach(audio => {
+                const promise = audio.play();
+                if (promise !== undefined) {
+                    promise.then(_ => {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    }).catch(error => {});
+                }
+            });
 
             startButtonContainer.style.display = 'none';
             ui.style.display = 'flex';
@@ -1435,6 +1436,7 @@
         });
 
         rankingButton.addEventListener('click', () => {
+            rankingIframe.src = BASE_RANKING_URL + '&timestamp=' + new Date().getTime();
             spreadsheetOverlay.style.display = 'flex';
         });
 
