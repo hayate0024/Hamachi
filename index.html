@@ -600,16 +600,17 @@
             <h2 id="explanationTitle">ゲーム説明</h2>
             <p>
                 「ハマチ」と「カンパチ」、そしてその仲間たち。<br>
-                このゲームは「ハマチ」と「カンパチ」の理解を深めるためのゲームです。ザ・グレイトピープルズのハマチカンパチを聴く上での助けとなったりするでしょう。無数に存在する出世魚の名前をマスターし、高スコアを目指しましょう。
+                このゲームは「ハマチ」と「カンパチ」の理解を深めるためのゲームです。ザ・グレイトピープルズのハマチカンパチを聴く上での助けとなったりしなかったりするでしょう。
             </p>
             <h3>基本的なルール</h3>
             <ul>
                 <li>プレイヤーは左右に移動できます。</li>
+                <li>魚が上から降ってきます。魚は攻撃してきます。</li>
                 <li>魚の名前を見て「ハマチ」の仲間なのか「カンパチ」の仲間なのかを判断し、適切な種類のショットで仕分けていきましょう。</li>
                 <li>「ハマチ！」ボタンで「ハマチショット」（青い弾）を発射。</li>
                 <li>「カンパチ！」ボタンで「カンパチショット」（ピンクの弾）を発射。</li>
-                <li>弾があたると魚は消えます（元の世界に帰ります）。</li>
-                <li>誤ったショットで魚を撃つと、魚が怒ってさらに降下してきます。</li>
+                <li>正しい弾があたると魚は消えます（元の世界に帰ります）。</li>
+                <li>誤った弾で魚を撃つと、魚が怒ってさらに降下してきます。</li>
                 <li>魚の攻撃を受けるとライフが減ります。ライフがなくなったり魚が最下段まで到達するとゲームオーバーです。</li>
                 <li>すべての魚を仕分けるとレベルアップ！さらに多くの出世魚たちが現れます。</li>
             </ul>
@@ -619,9 +620,9 @@
                 「出世魚」とは、成長するにつれて呼び名が変わる魚のことです。地方によっても様々な呼び名があり、その多様性が日本の豊かな食文化を支えています。
             </p>
             <h4>ブリ系（ハマチ系）の主な呼び名</h4>
-             <p>ブリは、稚魚から成魚になるまでに何度も名前を変える、まさに「出世魚」の代表格です。以下に、その成長段階と地域ごとの呼び名を紹介します。</p>
+             <p>ブリは、稚魚から成魚になるまでに何度も名前を変える、まさに「出世魚」の代表格です。</p>
             <ul>
-                <li>一般的な呼び名（大きさによる目安）
+                <li>一般的な呼び名
                     <ul>
                         <li>ワカシ/ツバス/ショゴなど: 35cm以下の幼魚。小さい段階。</li>
                         <li>イナダ/ハマチ/フクラギなど: 35～60cm程度の若魚。</li>
@@ -673,9 +674,8 @@
                 </li>
             </ul>
             <h4>カンパチ系の主な呼び名</h4>
-            <p>カンパチもまた、地方ごとに異なるユニークな呼び名を持つ出世魚です。以下に、その成長段階と地域ごとの呼び名を紹介します。</p>
-            <ul>
-                <li>一般的な呼び名（大きさによる目安）
+            <p>カンパチもまた、地方ごとに異なるユニークな呼び名を持つ出世魚です。
+                <li>一般的な呼び名
                     <ul>
                         <li>ショッコ/シオッコ: 10～20cm程度の幼魚。非常に小さい段階。</li>
                         <li>シオ: 20～30cm程度の若魚。</li>
@@ -697,7 +697,6 @@
                             <ul>
                                 <li>シオ (60cmまで)</li>
                                 <li>カンパチ (60cm以上)</li>
-                                <li>若魚を「ハマチ」と呼ぶこともありますが、これはブリの成長途上の呼び方と混同されがちです。</li>
                             </ul>
                         </li>
                         <li>九州地方:
@@ -706,7 +705,7 @@
                                 <li>アカバナ (若魚の一部)</li>
                                 <li>カンパチ (成魚)</li>
                                 <li>宮崎では「ニリ」、鹿児島では「ニノコ」、鹿児島県では「ネイゴ」や「アカバラ」という呼び名もあります。</li>
-                                <li>幼魚を「ヒラゴ」、成魚を「ヒラス」（ヒラマサと混同されやすい）と呼ぶこともあります。</li>
+                                <li>幼魚を「ヒラゴ」、成魚を「ヒラス」と呼ぶこともあります。</li>
                             </ul>
                         </li>
                         <li>沖縄地方:
@@ -756,6 +755,7 @@
         const startButton = document.getElementById('startButton');
         const explainButton = document.getElementById('explainButton');
         const rankingButton = document.getElementById('rankingButton');
+        const restartButton = document.getElementById('restartButton');
         const explanationOverlay = document.getElementById('explanationOverlay');
         const closeExplanationButton = document.getElementById('closeExplanationButton');
         const personalHighScoreDisplay = document.getElementById('personalHighScore');
@@ -768,7 +768,6 @@
         const mainTitle = document.getElementById('mainTitle');
         const explanationTitle = document.getElementById('explanationTitle');
         const rankingIframe = document.getElementById('rankingIframe');
-        const restartButton = document.getElementById('restartButton');
 
         const GOOGLE_FORM_URL = 'https://docs.google.com/forms/u/0/d/e/1FAIpQLSc_Nch5Rt2IvGJb3h6-V4JeTkeJ76Xy0OhcES7zB2-0fwwdtg/formResponse';
         const FORM_PLAYER_NAME_ENTRY_ID = 'entry.1723250269';
@@ -1182,7 +1181,9 @@
         function checkLevelUp() {
             if (gameState.enemies.length > 0 && !gameState.enemies.some(e => e.alive)) {
                 gameState.level++;
-                playSound('audio-clear');
+                setTimeout(() => {
+                    playSound('audio-clear');
+                }, 1500);
                 createEnemies();
                 if (gameState.playerTargetPositions.length > 0) {
                     const middleIndex = Math.floor(gameState.playerTargetPositions.length / 2);
@@ -1372,7 +1373,6 @@
         addTouchListener(document.getElementById('shootKanpachiButton'), () => shoot('kanpachi'));
 
         startButton.addEventListener('click', () => {
-            playSound('audio-start');
             const playerName = playerNameInput.value.trim();
             if (playerName === "") {
                 playerNameErrorMessage.textContent = "名前を入力してください";
@@ -1400,6 +1400,8 @@
                 }
             });
 
+            playSound('audio-start');
+            
             startButtonContainer.style.display = 'none';
             ui.style.display = 'flex';
             gameContainer.style.display = 'block';
