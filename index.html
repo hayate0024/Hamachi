@@ -313,9 +313,8 @@
             box-sizing: border-box;
         }
 
-        /* ★ 最高得点表示用のスタイル */
         #personalHighScore {
-            order: 4; /* 表示順序: 最後 */
+            order: 4;
             margin-top: 30px;
             font-size: clamp(16px, 3.5vw, 24px);
             color: var(--color-text-light);
@@ -744,6 +743,9 @@
     <audio id="audio-kanpachi" src="kanpachi.mp3" preload="auto"></audio>
     <audio id="audio-chigau" src="chigau.mp3" preload="auto"></audio>
     <audio id="audio-vu" src="vu.mp3" preload="auto"></audio>
+    <audio id="audio-start" src="start.mp3" preload="auto"></audio>
+    <audio id="audio-clear" src="clear.mp3" preload="auto"></audio>
+    <audio id="audio-retry" src="retry.mp3" preload="auto"></audio>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -766,6 +768,7 @@
         const mainTitle = document.getElementById('mainTitle');
         const explanationTitle = document.getElementById('explanationTitle');
         const rankingIframe = document.getElementById('rankingIframe');
+        const restartButton = document.getElementById('restartButton');
 
         const GOOGLE_FORM_URL = 'https://docs.google.com/forms/u/0/d/e/1FAIpQLSc_Nch5Rt2IvGJb3h6-V4JeTkeJ76Xy0OhcES7zB2-0fwwdtg/formResponse';
         const FORM_PLAYER_NAME_ENTRY_ID = 'entry.1723250269';
@@ -812,12 +815,10 @@
         const ENEMY_AUTO_DROP_FACTOR = 0.25;
         const ENEMY_SHOOT_CHANCE_BASE = 0.01;
         const ENEMY_SHOOT_CHANCE_LEVEL_FACTOR = 0.5;
-
-        // --- ★レベルによる速度調整用の定数 ---
-        const BASE_AUTO_DROP_INTERVAL = 5000; // レベル1での落下間隔 (ミリ秒)
-        const LEVEL_DROP_INTERVAL_REDUCTION = 250; // 1レベルごとに短くなる時間 (ミリ秒)
-        const MIN_DROP_INTERVAL = 1200; // 最短の落下間隔 (ミリ秒)
-        // --- ★ここまで ---
+        
+        const BASE_AUTO_DROP_INTERVAL = 5000;
+        const LEVEL_DROP_INTERVAL_REDUCTION = 250;
+        const MIN_DROP_INTERVAL = 1200;
 
         const WATER_SURFACE_Y_OFFSET_FROM_ENEMY_TOP = -50;
         const WAVE_AMPLITUDE_BASE = 6;
@@ -863,7 +864,7 @@
             const sound = document.getElementById(soundId);
             if (sound) {
                 sound.currentTime = 0;
-                sound.play().catch(e => console.error("Audio play failed:", e));
+                sound.play().catch(e => {});
             }
         }
 
@@ -1099,7 +1100,6 @@
                 }
             }
             const currentTime = performance.now();
-            // ★レベルに応じて落下間隔を計算
             const currentDropInterval = Math.max(MIN_DROP_INTERVAL, BASE_AUTO_DROP_INTERVAL - ((gameState.level - 1) * LEVEL_DROP_INTERVAL_REDUCTION));
             if (currentTime - gameState.lastEnemyAutoDropTime > currentDropInterval) {
                 dropAllEnemies(scale(ENEMY_BASE_HEIGHT * ENEMY_AUTO_DROP_FACTOR));
@@ -1117,20 +1117,6 @@
                     }
                 }
             }
-        }
-
-        function playBeep(frequency, waveType = 'sine', duration = 0.1, volume = 0.5) {
-            if (!audioContext) return;
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            oscillator.type = waveType;
-            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + duration);
         }
 
         function checkCollisions() {
@@ -1187,7 +1173,6 @@
             gameState.gameOver = true;
             document.getElementById('gameOver').style.display = 'block';
             document.getElementById('finalScore').textContent = gameState.score;
-            playBeep(100, 'triangle', 0.5, 0.9);
             saveHighScore(gameState.score);
             submitScoreToGoogleForm(gameState.playerName, gameState.score);
             yourRankDisplay.textContent = "";
@@ -1197,6 +1182,7 @@
         function checkLevelUp() {
             if (gameState.enemies.length > 0 && !gameState.enemies.some(e => e.alive)) {
                 gameState.level++;
+                playSound('audio-clear');
                 createEnemies();
                 if (gameState.playerTargetPositions.length > 0) {
                     const middleIndex = Math.floor(gameState.playerTargetPositions.length / 2);
@@ -1330,10 +1316,13 @@
             formData.append(FORM_SCORE_ENTRY_ID, score);
             try {
                 await fetch(GOOGLE_FORM_URL, { method: 'POST', mode: 'no-cors', body: formData });
-                console.log('Score submitted to Google Form.');
             } catch (error) {
                 console.error('Error submitting score to Google Form:', error);
             }
+        }
+        
+        function refreshRankingSource() {
+            rankingIframe.src = BASE_RANKING_URL + '&timestamp=' + new Date().getTime();
         }
 
         function showStartScreen() {
@@ -1383,6 +1372,7 @@
         addTouchListener(document.getElementById('shootKanpachiButton'), () => shoot('kanpachi'));
 
         startButton.addEventListener('click', () => {
+            playSound('audio-start');
             const playerName = playerNameInput.value.trim();
             if (playerName === "") {
                 playerNameErrorMessage.textContent = "名前を入力してください";
@@ -1399,7 +1389,7 @@
                     console.warn("Web Audio API not supported.", e);
                 }
             }
-
+            
             document.querySelectorAll('audio').forEach(audio => {
                 const promise = audio.play();
                 if (promise !== undefined) {
@@ -1436,7 +1426,6 @@
         });
 
         rankingButton.addEventListener('click', () => {
-            rankingIframe.src = BASE_RANKING_URL + '&timestamp=' + new Date().getTime();
             spreadsheetOverlay.style.display = 'flex';
         });
 
@@ -1444,7 +1433,12 @@
             spreadsheetOverlay.style.display = 'none';
         });
 
-        restartButton.addEventListener('click', showStartScreen);
+        restartButton.addEventListener('click', () => {
+            playSound('audio-retry');
+            refreshRankingSource();
+            showStartScreen();
+        });
+        
         exitButton.addEventListener('click', showStartScreen);
 
     </script>
