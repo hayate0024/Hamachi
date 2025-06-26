@@ -981,7 +981,8 @@
             }
             UNIFIED_ENEMY_FONT_SIZE = Math.max(testFontSize, minAllowedEnemyFontSize);
         }
-
+        
+        // ===== ここを修正しました =====
         function createEnemies() {
             gameState.enemies = [];
             const enemyWidth = scale(ENEMY_BASE_WIDTH);
@@ -995,7 +996,14 @@
 
             for (let row = 0; row < ENEMY_ROWS; row++) {
                 for (let col = 0; col < ENEMY_COLS; col++) {
-                    const enemyText = ALL_WORDS[Math.floor(Math.random() * ALL_WORDS.length)];
+                    let enemyText;
+                    // 70%の確率でハマチ系を選択
+                    if (Math.random() < 0.7) { 
+                        enemyText = HAMACHI_WORDS[Math.floor(Math.random() * HAMACHI_WORDS.length)];
+                    } else { // 残りの30%でカンパチ系を選択
+                        enemyText = KANPACHI_WORDS[Math.floor(Math.random() * KANPACHI_WORDS.length)];
+                    }
+
                     const enemyX = firstEnemyX + col * colSpacing;
                     const enemyY = startY + row * rowSpacing;
                     const enemyCenterX = enemyX + enemyWidth / 2;
@@ -1086,7 +1094,6 @@
             }
         }
 
-        // ===== ここを修正しました =====
         function checkCollisions() {
             const dropAmountCollision = scale(ENEMY_DROP_AMOUNT_COLLISION);
             for (let i = gameState.bullets.length - 1; i >= 0; i--) {
@@ -1101,10 +1108,8 @@
                             enemy.alive = false;
                             gameState.score += 10;
                             
-                            // 他に生きている敵がいるか確認
                             const remainingEnemies = gameState.enemies.some(e => e.alive);
                             
-                            // 他の敵がいる場合のみ、正解音を鳴らす
                             if (remainingEnemies) {
                                 if (bullet.type === 'hamachi') {
                                     playSound('audio-hamachi');
