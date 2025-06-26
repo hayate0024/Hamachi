@@ -539,7 +539,7 @@
             <div id="yourRank"></div>
             <button id="restartButton">もどる</button>
         </div>
-
+        
         <div id="mobileControls" style="display: none;">
             <button id="leftButton" class="control-button">←</button>
             <button id="shootHamachiButton" class="control-button shoot shoot-hamachi">ハマチ！</button>
@@ -578,20 +578,20 @@
             <h2 id="explanationTitle">ゲーム説明</h2>
             <p>
                 「ハマチ」と「カンパチ」、そしてその仲間たち。<br>
-                これは「ハマチ」と「カンパチ」の理解を深めるためのゲームです。ザ・グレイトピープルズのハマチカンパチを感じる上での助けとなったりしなかったりするでしょう。
+                これは「ハマチ」と「カンパチ」の造詣を深めるためのゲームです。ザ・グレイトピープルズの「ハマチカンパチ」を感じる上での助けとなったり、しなかったりするでしょう。
             </p>
             <h3>基本的なルール</h3>
             <ul>
                 <li>プレイヤーは左右に移動できます。</li>
                 <li>魚が上から降ってきます。魚はなぜか攻撃してきます。</li>
-                <li>魚の名前を見て「ハマチ」の仲間なのか「カンパチ」の仲間なのかを判断し、適切な種類のショットで仕分けていきましょう。</li>
-                <li>「ハマチ！」ボタンで「ハマチショット」（青い弾）を発射。</li>
-                <li>「カンパチ！」ボタンで「カンパチショット」（ピンクの弾）を発射。</li>
-                <li>正しい弾があたると魚は消えます（元の世界に帰ります）。</li>
-                <li>誤った弾で魚を撃つと、魚が怒ってさらに降下してきます。</li>
-                <li>正解すると10点加点、間違うと5点減点されます。</li>
+                <li>魚の名前を見て「ハマチ」の仲間なのか「カンパチ」の仲間なのかを判断し、適切なショットで仕分けていきましょう。</li>
+                <li>「ハマチ！」ボタンで「ハマチショット」（青い弾）を発射します。</li>
+                <li>「カンパチ！」ボタンで「カンパチショット」（ピンクの弾）を発射します。</li>
+                <li>正しい弾が当たると魚は消えます（元の世界に帰ります）。</li>
+                <li>誤った弾が当たると、魚が怒ってさらに降下してきます。</li>
+                <li>正しい弾が当たると10点加点、誤った弾が当たると5点減点されます。</li>
                 <li>魚の攻撃を受けるとライフが減ります。ライフがなくなったり魚がプレイヤーまで到達するとゲームオーバーです。</li>
-                <li>すべての魚を仕分けるとレベルアップ！さらに多くの出世魚たちが現れます。</li>
+                <li>すべての魚を仕分けるとレベルアップ！さらに多くの出世魚たちが現れます。高得点を目指しましょう。</li>
             </ul>
 
             <h3>出世魚（しゅっせうお）について</h3>
@@ -1367,15 +1367,29 @@
                 }
             }
 
+            // ===== ここからが修正箇所 =====
             document.querySelectorAll('audio').forEach(audio => {
+                // 音量を一時的に0にする
+                const originalVolume = audio.volume;
+                audio.volume = 0;
+
                 const promise = audio.play();
                 if (promise !== undefined) {
                     promise.then(_ => {
                         audio.pause();
                         audio.currentTime = 0;
-                    }).catch(error => {});
+                        // 音量を元に戻す
+                        audio.volume = originalVolume;
+                    }).catch(error => {
+                        // エラーが発生した場合も音量を元に戻す
+                        audio.volume = originalVolume;
+                    });
+                } else {
+                    // promiseに対応していない古いブラウザの場合も音量を元に戻す
+                    audio.volume = originalVolume;
                 }
             });
+            // ===== ここまでが修正箇所 =====
 
             // 0.5秒後にスタート音を再生
             setTimeout(() => {
