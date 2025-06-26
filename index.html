@@ -578,20 +578,20 @@
             <h2 id="explanationTitle">ゲーム説明</h2>
             <p>
                 「ハマチ」と「カンパチ」、そしてその仲間たち。<br>
-                これは「ハマチ」と「カンパチ」の造詣を深めるためのゲームです。ザ・グレイトピープルズの「ハマチカンパチ」を感じる上での助けとなったり、しなかったりするでしょう。
+                これは「ハマチ」と「カンパチ」の理解を深めるためのゲームです。ザ・グレイトピープルズのハマチカンパチを感じる上での助けとなったりしなかったりするでしょう。
             </p>
             <h3>基本的なルール</h3>
             <ul>
                 <li>プレイヤーは左右に移動できます。</li>
                 <li>魚が上から降ってきます。魚はなぜか攻撃してきます。</li>
-                <li>魚の名前を見て「ハマチ」の仲間なのか「カンパチ」の仲間なのかを判断し、適切なショットで仕分けていきましょう。</li>
-                <li>「ハマチ！」ボタンで「ハマチショット」（青い弾）を発射します。</li>
-                <li>「カンパチ！」ボタンで「カンパチショット」（ピンクの弾）を発射します。</li>
-                <li>正しい弾が当たると魚は消えます（元の世界に帰ります）。</li>
-                <li>誤った弾が当たると、魚が怒ってさらに降下してきます。</li>
-                <li>正しい弾が当たると10点加点、誤った弾が当たると5点減点されます。</li>
+                <li>魚の名前を見て「ハマチ」の仲間なのか「カンパチ」の仲間なのかを判断し、適切な種類のショットで仕分けていきましょう。</li>
+                <li>「ハマチ！」ボタンで「ハマチショット」（青い弾）を発射。</li>
+                <li>「カンパチ！」ボタンで「カンパチショット」（ピンクの弾）を発射。</li>
+                <li>正しい弾があたると魚は消えます（元の世界に帰ります）。</li>
+                <li>誤った弾で魚を撃つと、魚が怒ってさらに降下してきます。</li>
+                <li>正解すると10点加点、間違うと5点減点されます。</li>
                 <li>魚の攻撃を受けるとライフが減ります。ライフがなくなったり魚がプレイヤーまで到達するとゲームオーバーです。</li>
-                <li>すべての魚を仕分けるとレベルアップ！さらに多くの出世魚たちが現れます。高得点を目指しましょう。</li>
+                <li>すべての魚を仕分けるとレベルアップ！さらに多くの出世魚たちが現れます。</li>
             </ul>
 
             <h3>出世魚（しゅっせうお）について</h3>
@@ -760,7 +760,7 @@
         const HAMACHI_WORDS = [
             'ワカシ', 'ツバス', 'コゾクラ', 'ヤズ', 'アブコ', 'ショゴ',
             'イナダ', 'ハマチ', 'フクラギ', 'ガンド', 'ワカナ', 'ワラサ', 'メジロ',
-            'オオイナダ', 'ブリ'
+            'オオイナда', 'ブリ'
         ];
         const KANPACHI_WORDS = [
             'ショッコ', 'シオッコ', 'シオ', 'アカバナ', 'アカバネ', 'アカハナ', 'カンパチ', 'シオゴ',
@@ -830,6 +830,7 @@
             level: 1,
             playerName: '',
             gameOver: false,
+            isPaused: false, // ===== 新しく追加 =====
             keys: {},
             lastShootTime: 0,
             lastEnemyAutoDropTime: 0,
@@ -949,6 +950,7 @@
                 lives: 3,
                 level: 1,
                 gameOver: false,
+                isPaused: false, // ===== 追加 =====
                 keys: {},
                 lastShootTime: 0,
                 lastEnemyAutoDropTime: performance.now()
@@ -1014,9 +1016,8 @@
         }
 
         function handleKeyDown(e) {
-            if (explanationOverlay.style.display === 'flex' || spreadsheetOverlay.style.display === 'flex' || gameState.gameOver) return;
+            if (gameState.isPaused || explanationOverlay.style.display === 'flex' || spreadsheetOverlay.style.display === 'flex' || gameState.gameOver) return;
             gameState.keys[e.key] = true;
-            // キーボード操作はマウス操作と併存させても良いが、今回は削除
         }
 
         function toggleDebug() {
@@ -1024,7 +1025,7 @@
         }
 
         function movePlayer(direction) {
-            if (gameState.playerTargetPositions.length === 0) return;
+            if (gameState.isPaused || gameState.playerTargetPositions.length === 0) return;
             const newIndex = gameState.currentPlayerTargetIndex + direction * PLAYER_GRID_MOVE_AMOUNT;
             if (newIndex >= 0 && newIndex < gameState.playerTargetPositions.length) {
                 gameState.currentPlayerTargetIndex = newIndex;
@@ -1034,7 +1035,7 @@
         }
 
         function shoot(type) {
-            if (gameState.gameOver || performance.now() - gameState.lastShootTime < SHOOT_COOLDOWN) return;
+            if (gameState.isPaused || gameState.gameOver || performance.now() - gameState.lastShootTime < SHOOT_COOLDOWN) return;
             gameState.bullets.push({
                 x: gameState.player.x + gameState.player.width / 2 - scale(BULLET_PLAYER_BASE_WIDTH) / 2,
                 y: gameState.player.y,
@@ -1097,24 +1098,18 @@
                         if (isMatch) {
                             enemy.alive = false;
                             gameState.score += 10;
-
-                            // 最後の敵かどうかをチェック
-                            if (!gameState.enemies.some(e => e.alive)) {
-                                playSound('audio-clear');
+                            if (bullet.type === 'hamachi') {
+                                playSound('audio-hamachi');
                             } else {
-                                if (bullet.type === 'hamachi') {
-                                    playSound('audio-hamachi');
-                                } else {
-                                    playSound('audio-kanpachi');
-                                }
+                                playSound('audio-kanpachi');
                             }
                         } else {
-                            gameState.score = Math.max(0, gameState.score - 5); // 間違えたら5点引く（0点未満にはしない）
+                            gameState.score = Math.max(0, gameState.score - 5);
                             playSound('audio-chigau');
                             dropAllEnemies(dropAmountCollision);
                         }
                         gameState.bullets.splice(i, 1);
-                        break;
+                        break; 
                     }
                 }
             }
@@ -1152,16 +1147,25 @@
             exitButton.style.display = 'none';
         }
 
+        // ===== 関数を修正 =====
         function checkLevelUp() {
             if (gameState.enemies.length > 0 && !gameState.enemies.some(e => e.alive)) {
-                gameState.level++;
-                createEnemies();
-                if (gameState.playerTargetPositions.length > 0) {
-                    const middleIndex = Math.floor(gameState.playerTargetPositions.length / 2);
-                    gameState.currentPlayerTargetIndex = middleIndex;
-                    gameState.player.x = gameState.playerTargetPositions[middleIndex] - gameState.player.width / 2;
-                }
-                gameState.lastEnemyAutoDropTime = performance.now();
+                if (gameState.isPaused) return;
+
+                gameState.isPaused = true;
+                playSound('audio-clear');
+
+                setTimeout(() => {
+                    gameState.level++;
+                    createEnemies();
+                    if (gameState.playerTargetPositions.length > 0) {
+                        const middleIndex = Math.floor(gameState.playerTargetPositions.length / 2);
+                        gameState.currentPlayerTargetIndex = middleIndex;
+                        gameState.player.x = gameState.playerTargetPositions[middleIndex] - gameState.player.width / 2;
+                    }
+                    gameState.lastEnemyAutoDropTime = performance.now();
+                    gameState.isPaused = false;
+                }, 1000); // 1秒間表示
             }
         }
 
@@ -1241,20 +1245,54 @@
             }
         }
 
+        // ===== 新しい関数を追加 =====
+        function drawLevelUpMessage() {
+            const text = `LEVEL ${gameState.level + 1}`;
+            ctx.save(); // 現在の描画スタイルを保存
+
+            const fontSize = scale(80);
+            ctx.font = `bold ${fontSize}px 'DotGothic16', 'Press Start 2P'`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // 影付き文字
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillText(text, canvas.width / 2 + scale(6), canvas.height / 2 + scale(6));
+            
+            ctx.fillStyle = var(--color-text-title-shadow);
+            ctx.fillText(text, canvas.width / 2 + scale(3), canvas.height / 2 + scale(3));
+
+            ctx.fillStyle = var(--color-text-title);
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+            ctx.restore(); // スタイルを元に戻す
+        }
+
+
         function updateUI() {
             document.getElementById('score').textContent = gameState.score;
             document.getElementById('lives').textContent = gameState.lives;
             document.getElementById('level').textContent = gameState.level;
         }
 
+        // ===== 関数を修正 =====
         function gameLoop() {
             if (!gameState.gameOver) {
-                updateBullets();
-                updateEnemies();
-                checkCollisions();
-                checkLevelUp();
+                if (!gameState.isPaused) {
+                    updateBullets();
+                    updateEnemies();
+                    checkCollisions();
+                    checkLevelUp();
+                }
             }
-            draw();
+
+            draw(); // 描画は常に実行
+
+            // レベルアップメッセージの描画
+            if (gameState.isPaused && !gameState.gameOver) {
+                drawLevelUpMessage();
+            }
+
             updateUI();
             frameCount++;
             animationFrameId = requestAnimationFrame(gameLoop);
@@ -1332,7 +1370,6 @@
         document.addEventListener('keyup', (e) => { gameState.keys[e.key] = false; });
 
         const addTouchListener = (element, action) => {
-            // マウスイベントも追加
             element.addEventListener('mousedown', (e) => {
                 if (gameState.gameOver) return;
                 e.preventDefault();
@@ -1366,10 +1403,8 @@
                     console.warn("Web Audio API not supported.", e);
                 }
             }
-
-            // ===== ここからが修正箇所 =====
+            
             document.querySelectorAll('audio').forEach(audio => {
-                // 音量を一時的に0にする
                 const originalVolume = audio.volume;
                 audio.volume = 0;
 
@@ -1378,20 +1413,15 @@
                     promise.then(_ => {
                         audio.pause();
                         audio.currentTime = 0;
-                        // 音量を元に戻す
                         audio.volume = originalVolume;
                     }).catch(error => {
-                        // エラーが発生した場合も音量を元に戻す
                         audio.volume = originalVolume;
                     });
                 } else {
-                    // promiseに対応していない古いブラウザの場合も音量を元に戻す
                     audio.volume = originalVolume;
                 }
             });
-            // ===== ここまでが修正箇所 =====
 
-            // 0.5秒後にスタート音を再生
             setTimeout(() => {
                 playSound('audio-start');
             }, 500);
@@ -1400,7 +1430,6 @@
             startButtonContainer.style.display = 'none';
             ui.style.display = 'flex';
             gameContainer.style.display = 'block';
-            // PCでも常にモバイルコントロールを表示
             document.getElementById('mobileControls').style.display = 'flex';
             exitButton.style.display = 'block';
 
