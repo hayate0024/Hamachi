@@ -1086,6 +1086,7 @@
             }
         }
 
+        // ===== ここを修正しました =====
         function checkCollisions() {
             const dropAmountCollision = scale(ENEMY_DROP_AMOUNT_COLLISION);
             for (let i = gameState.bullets.length - 1; i >= 0; i--) {
@@ -1095,13 +1096,21 @@
                     if (enemy.alive && isColliding(bullet, enemy)) {
                         const isMatch = (bullet.type === 'hamachi' && HAMACHI_WORDS.includes(enemy.text)) ||
                                         (bullet.type === 'kanpachi' && KANPACHI_WORDS.includes(enemy.text));
+                        
                         if (isMatch) {
                             enemy.alive = false;
                             gameState.score += 10;
-                            if (bullet.type === 'hamachi') {
-                                playSound('audio-hamachi');
-                            } else {
-                                playSound('audio-kanpachi');
+                            
+                            // 他に生きている敵がいるか確認
+                            const remainingEnemies = gameState.enemies.some(e => e.alive);
+                            
+                            // 他の敵がいる場合のみ、正解音を鳴らす
+                            if (remainingEnemies) {
+                                if (bullet.type === 'hamachi') {
+                                    playSound('audio-hamachi');
+                                } else {
+                                    playSound('audio-kanpachi');
+                                }
                             }
                         } else {
                             gameState.score = Math.max(0, gameState.score - 5);
@@ -1147,16 +1156,13 @@
             exitButton.style.display = 'none';
         }
 
-        // ===== ここを修正しました =====
         function checkLevelUp() {
             if (gameState.enemies.length > 0 && !gameState.enemies.some(e => e.alive)) {
                 if (gameState.isPaused) return;
 
                 gameState.isPaused = true;
-                // レベル表示と同時に音が鳴ります
                 playSound('audio-clear');
 
-                // 表示時間を2秒に変更
                 setTimeout(() => {
                     gameState.level++;
                     createEnemies();
@@ -1167,7 +1173,7 @@
                     }
                     gameState.lastEnemyAutoDropTime = performance.now();
                     gameState.isPaused = false;
-                }, 2000); // 2秒間表示
+                }, 2000);
             }
         }
 
