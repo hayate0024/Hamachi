@@ -757,10 +757,11 @@
         const ORIGINAL_CANVAS_WIDTH = 800;
         const ORIGINAL_CANVAS_HEIGHT = 800;
 
+        // ===== 魚の名称のタイポを修正 =====
         const HAMACHI_WORDS = [
             'ワカシ', 'ツバス', 'コゾクラ', 'ヤズ', 'アブコ', 'ショゴ',
             'イナダ', 'ハマチ', 'フクラギ', 'ガンド', 'ワカナ', 'ワラサ', 'メジロ',
-            'オオイナда', 'ブリ'
+            'オオイナダ', 'ブリ'
         ];
         const KANPACHI_WORDS = [
             'ショッコ', 'シオッコ', 'シオ', 'アカバナ', 'アカバネ', 'アカハナ', 'カンパチ', 'シオゴ',
@@ -830,7 +831,7 @@
             level: 1,
             playerName: '',
             gameOver: false,
-            isPaused: false, // ===== 新しく追加 =====
+            isPaused: false,
             keys: {},
             lastShootTime: 0,
             lastEnemyAutoDropTime: 0,
@@ -950,7 +951,7 @@
                 lives: 3,
                 level: 1,
                 gameOver: false,
-                isPaused: false, // ===== 追加 =====
+                isPaused: false,
                 keys: {},
                 lastShootTime: 0,
                 lastEnemyAutoDropTime: performance.now()
@@ -1147,7 +1148,6 @@
             exitButton.style.display = 'none';
         }
 
-        // ===== 関数を修正 =====
         function checkLevelUp() {
             if (gameState.enemies.length > 0 && !gameState.enemies.some(e => e.alive)) {
                 if (gameState.isPaused) return;
@@ -1165,7 +1165,7 @@
                     }
                     gameState.lastEnemyAutoDropTime = performance.now();
                     gameState.isPaused = false;
-                }, 1000); // 1秒間表示
+                }, 1000);
             }
         }
 
@@ -1245,29 +1245,28 @@
             }
         }
 
-        // ===== 新しい関数を追加 =====
+        // ===== 構文エラーを修正した関数 =====
         function drawLevelUpMessage() {
             const text = `LEVEL ${gameState.level + 1}`;
-            ctx.save(); // 現在の描画スタイルを保存
+            ctx.save();
 
             const fontSize = scale(80);
             ctx.font = `bold ${fontSize}px 'DotGothic16', 'Press Start 2P'`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
-            // 影付き文字
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
             ctx.fillText(text, canvas.width / 2 + scale(6), canvas.height / 2 + scale(6));
             
-            ctx.fillStyle = var(--color-text-title-shadow);
+            // CSS変数を直接使わず、実際のカラーコードを指定する
+            ctx.fillStyle = '#cc9900'; // var(--color-text-title-shadow)
             ctx.fillText(text, canvas.width / 2 + scale(3), canvas.height / 2 + scale(3));
 
-            ctx.fillStyle = var(--color-text-title);
+            ctx.fillStyle = '#ffcc00'; // var(--color-text-title)
             ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-            ctx.restore(); // スタイルを元に戻す
+            ctx.restore();
         }
-
 
         function updateUI() {
             document.getElementById('score').textContent = gameState.score;
@@ -1275,7 +1274,6 @@
             document.getElementById('level').textContent = gameState.level;
         }
 
-        // ===== 関数を修正 =====
         function gameLoop() {
             if (!gameState.gameOver) {
                 if (!gameState.isPaused) {
@@ -1286,9 +1284,8 @@
                 }
             }
 
-            draw(); // 描画は常に実行
+            draw();
 
-            // レベルアップメッセージの描画
             if (gameState.isPaused && !gameState.gameOver) {
                 drawLevelUpMessage();
             }
