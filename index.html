@@ -217,6 +217,7 @@
             margin: 0 0 25px 0;
             text-shadow: 3px 3px var(--color-text-title-shadow);
             animation: retro-blink 1.6s steps(1, end) infinite;
+            white-space: nowrap; /* これを追加 */
         }
 
         @keyframes retro-blink {
@@ -780,18 +781,20 @@
         const PLAYER_BASE_WIDTH = 40;
         const PLAYER_BASE_HEIGHT = 30;
         const PLAYER_Y_OFFSET_FROM_BOTTOM_BASE = 180;
+        
+        const BULLET_PLAYER_SPEED_PER_SEC = 420;
+        const BULLET_ENEMY_SPEED_PER_SEC = 90;
         const BULLET_PLAYER_BASE_WIDTH = 4;
         const BULLET_PLAYER_BASE_HEIGHT = 10;
-        const BULLET_PLAYER_BASE_SPEED = 7;
         const BULLET_ENEMY_BASE_WIDTH = 8;
         const BULLET_ENEMY_BASE_HEIGHT = 16;
-        const BULLET_ENEMY_BASE_SPEED = 1.5;
-
+        
         const SHOOT_COOLDOWN = 200;
         const PLAYER_GRID_MOVE_AMOUNT = 1;
         const ENEMY_DROP_AMOUNT_COLLISION = 20;
         const ENEMY_AUTO_DROP_FACTOR = 0.25;
-        const ENEMY_SHOOT_CHANCE_BASE = 0.01;
+        
+        const ENEMY_SHOOT_RATE_PER_SEC = 0.6;
         const ENEMY_SHOOT_CHANCE_LEVEL_FACTOR = 0.5;
 
         const BASE_AUTO_DROP_INTERVAL = 5000;
@@ -813,11 +816,12 @@
         const ENEMY_BULLET_COLOR = '#ff6666';
         const ENEMY_BULLET_SHADOW_COLOR = '#993333';
 
-        let frameCount = 0;
-        let UNIFIED_ENEMY_FONT_SIZE = 0;
-        let showDebugLines = true;
-        let audioContext;
+        let lastFrameTime = 0;
+        let totalGameTime = 0;
         let animationFrameId;
+
+        let UNIFIED_ENEMY_FONT_SIZE = 0;
+        let audioContext;
         let enemyBlockStyles = {};
 
         let gameState = {
@@ -941,8 +945,7 @@
             };
 
             calculateUnifiedEnemyFontSize();
-            createEnemies();
-
+            
             Object.assign(gameState, {
                 bullets: [],
                 enemyBullets: [],
@@ -955,7 +958,8 @@
                 lastShootTime: 0,
                 lastEnemyAutoDropTime: performance.now()
             });
-            frameCount = 0;
+            
+            createEnemies();
 
             if (gameState.playerTargetPositions.length > 0) {
                 const middleIndex = Math.floor(gameState.playerTargetPositions.length / 2);
@@ -982,7 +986,6 @@
             UNIFIED_ENEMY_FONT_SIZE = Math.max(testFontSize, minAllowedEnemyFontSize);
         }
         
-        // ===== ここを修正しました =====
         function createEnemies() {
             gameState.enemies = [];
             const enemyWidth = scale(ENEMY_BASE_WIDTH);
@@ -997,10 +1000,9 @@
             for (let row = 0; row < ENEMY_ROWS; row++) {
                 for (let col = 0; col < ENEMY_COLS; col++) {
                     let enemyText;
-                    // 70%の確率でハマチ系を選択
                     if (Math.random() < 0.7) { 
                         enemyText = HAMACHI_WORDS[Math.floor(Math.random() * HAMACHI_WORDS.length)];
-                    } else { // 残りの30%でカンパチ系を選択
+                    } else {
                         enemyText = KANPACHI_WORDS[Math.floor(Math.random() * KANPACHI_WORDS.length)];
                     }
 
@@ -1049,19 +1051,26 @@
                 y: gameState.player.y,
                 width: scale(BULLET_PLAYER_BASE_WIDTH),
                 height: scale(BULLET_PLAYER_BASE_HEIGHT),
-                speed: scale(BULLET_PLAYER_BASE_SPEED),
+                speed: scale(BULLET_PLAYER_SPEED_PER_SEC),
                 type: type
             });
             gameState.lastShootTime = performance.now();
         }
+        
+        function updateBullets(deltaTime) {
+            for (const bullet of gameState.bullets) {
+                bullet.y -= bullet.speed * deltaTime;
+            }
+            gameState.bullets = gameState.bullets.filter(b => b.y > 0);
 
-        function updateBullets() {
-            gameState.bullets = gameState.bullets.filter(b => (b.y -= b.speed) > 0);
-            gameState.enemyBullets = gameState.enemyBullets.filter(b => (b.y += b.speed) < canvas.height);
+            for (const bullet of gameState.enemyBullets) {
+                bullet.y += bullet.speed * deltaTime;
+            }
+            gameState.enemyBullets = gameState.enemyBullets.filter(b => b.y < canvas.height);
         }
 
-        function updateEnemies() {
-            if (Math.random() < ENEMY_SHOOT_CHANCE_BASE * (gameState.level * ENEMY_SHOOT_CHANCE_LEVEL_FACTOR)) {
+        function updateEnemies(deltaTime) {
+            if (Math.random() < ENEMY_SHOOT_RATE_PER_SEC * deltaTime * (gameState.level * ENEMY_SHOOT_CHANCE_LEVEL_FACTOR)) {
                 const aliveEnemies = gameState.enemies.filter(e => e.alive && e.y < canvas.height - scale(100));
                 if (aliveEnemies.length > 0) {
                     const enemy = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
@@ -1070,10 +1079,11 @@
                         y: enemy.y + enemy.height,
                         width: scale(BULLET_ENEMY_BASE_WIDTH),
                         height: scale(BULLET_ENEMY_BASE_HEIGHT),
-                        speed: scale(BULLET_ENEMY_BASE_SPEED)
+                        speed: scale(BULLET_ENEMY_SPEED_PER_SEC)
                     });
                 }
             }
+            
             const currentTime = performance.now();
             const currentDropInterval = Math.max(MIN_DROP_INTERVAL, BASE_AUTO_DROP_INTERVAL - ((gameState.level - 1) * LEVEL_DROP_INTERVAL_REDUCTION));
             if (currentTime - gameState.lastEnemyAutoDropTime > currentDropInterval) {
@@ -1186,6 +1196,7 @@
             const waterSurfaceY = scale(ENEMY_START_Y_OFFSET) + scale(WATER_SURFACE_Y_OFFSET_FROM_ENEMY_TOP);
             const waveAmplitude = scale(WAVE_AMPLITUDE_BASE);
             const waveFrequency = WAVE_FREQUENCY_BASE;
+            const waveSpeed = 6;
 
             ctx.fillStyle = WATER_COLOR_BOTTOM;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1193,7 +1204,7 @@
             ctx.beginPath();
             ctx.moveTo(0, waterSurfaceY);
             for (let x = 0; x <= canvas.width; x += scale(4)) {
-                ctx.lineTo(x, waterSurfaceY + Math.sin(x * waveFrequency + frameCount * 0.1) * waveAmplitude);
+                ctx.lineTo(x, waterSurfaceY + Math.sin(x * waveFrequency + totalGameTime * waveSpeed) * waveAmplitude);
             }
             ctx.lineTo(canvas.width, 0);
             ctx.lineTo(0, 0);
@@ -1207,7 +1218,7 @@
                 ctx.lineWidth = scale(2);
                 ctx.moveTo(offset, waterSurfaceY + offset);
                 for (let x = 0; x <= canvas.width; x += scale(4)) {
-                    ctx.lineTo(x + offset, waterSurfaceY + Math.sin(x * waveFrequency + frameCount * 0.1) * waveAmplitude + offset);
+                    ctx.lineTo(x + offset, waterSurfaceY + Math.sin(x * waveFrequency + totalGameTime * waveSpeed) * waveAmplitude + offset);
                 }
                 ctx.stroke();
             };
@@ -1285,14 +1296,26 @@
             document.getElementById('lives').textContent = gameState.lives;
             document.getElementById('level').textContent = gameState.level;
         }
-
-        function gameLoop() {
+        
+        function updateGame(deltaTime) {
+            totalGameTime += deltaTime;
+            updateBullets(deltaTime);
+            updateEnemies(deltaTime);
+            checkCollisions();
+            checkLevelUp();
+        }
+        
+        function gameLoop(currentTime) {
+            if (lastFrameTime === 0) {
+                lastFrameTime = currentTime;
+            }
+            
+            const deltaTime = (currentTime - lastFrameTime) / 1000;
+            lastFrameTime = currentTime;
+            
             if (!gameState.gameOver) {
                 if (!gameState.isPaused) {
-                    updateBullets();
-                    updateEnemies();
-                    checkCollisions();
-                    checkLevelUp();
+                    updateGame(deltaTime);
                 }
             }
 
@@ -1303,7 +1326,7 @@
             }
 
             updateUI();
-            frameCount++;
+            
             animationFrameId = requestAnimationFrame(gameLoop);
         }
 
@@ -1441,10 +1464,14 @@
             gameContainer.style.display = 'block';
             document.getElementById('mobileControls').style.display = 'flex';
             exitButton.style.display = 'block';
-
+            
             init();
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            gameLoop();
+            
+            lastFrameTime = 0;
+            totalGameTime = 0;
+            animationFrameId = requestAnimationFrame(gameLoop);
+            
             if (mainTitle) mainTitle.style.animationPlayState = 'paused';
         });
 
