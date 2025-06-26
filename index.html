@@ -757,7 +757,6 @@
         const ORIGINAL_CANVAS_WIDTH = 800;
         const ORIGINAL_CANVAS_HEIGHT = 800;
 
-        // ===== 魚の名称のタイポを修正 =====
         const HAMACHI_WORDS = [
             'ワカシ', 'ツバス', 'コゾクラ', 'ヤズ', 'アブコ', 'ショゴ',
             'イナダ', 'ハマチ', 'フクラギ', 'ガンド', 'ワカナ', 'ワラサ', 'メジロ',
@@ -1148,13 +1147,16 @@
             exitButton.style.display = 'none';
         }
 
+        // ===== ここを修正しました =====
         function checkLevelUp() {
             if (gameState.enemies.length > 0 && !gameState.enemies.some(e => e.alive)) {
                 if (gameState.isPaused) return;
 
                 gameState.isPaused = true;
+                // レベル表示と同時に音が鳴ります
                 playSound('audio-clear');
 
+                // 表示時間を2秒に変更
                 setTimeout(() => {
                     gameState.level++;
                     createEnemies();
@@ -1165,7 +1167,7 @@
                     }
                     gameState.lastEnemyAutoDropTime = performance.now();
                     gameState.isPaused = false;
-                }, 1000);
+                }, 2000); // 2秒間表示
             }
         }
 
@@ -1245,7 +1247,6 @@
             }
         }
 
-        // ===== 構文エラーを修正した関数 =====
         function drawLevelUpMessage() {
             const text = `LEVEL ${gameState.level + 1}`;
             ctx.save();
@@ -1258,15 +1259,15 @@
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
             ctx.fillText(text, canvas.width / 2 + scale(6), canvas.height / 2 + scale(6));
             
-            // CSS変数を直接使わず、実際のカラーコードを指定する
-            ctx.fillStyle = '#cc9900'; // var(--color-text-title-shadow)
+            ctx.fillStyle = '#cc9900';
             ctx.fillText(text, canvas.width / 2 + scale(3), canvas.height / 2 + scale(3));
 
-            ctx.fillStyle = '#ffcc00'; // var(--color-text-title)
+            ctx.fillStyle = '#ffcc00';
             ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
             ctx.restore();
         }
+
 
         function updateUI() {
             document.getElementById('score').textContent = gameState.score;
